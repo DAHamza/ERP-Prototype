@@ -1,0 +1,2382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Random BPO - Employee Portal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root { color-scheme: light; }
+  html, body { background: #f8fafc; }
+  body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+
+    // Minimal inline icon set (stand-ins for the lucide-react icons used in the original component)
+    function Icon({ d, size = 18, className = "", strokeWidth = 2, children }) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+             strokeLinecap="round" strokeLinejoin="round" className={className}>
+          {d ? <path d={d} /> : children}
+        </svg>
+      );
+    }
+    const Users = (p) => <Icon {...p} d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75" />;
+    const Wallet = (p) => <Icon {...p}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" /><path d="M18 12a2 2 0 0 0 0 4h4v-4Z" /></Icon>;
+    const Bell = (p) => <Icon {...p} d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0" />;
+    const Settings = (p) => <Icon {...p}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></Icon>;
+    const LogOut = (p) => <Icon {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></Icon>;
+    const ChevronDown = (p) => <Icon {...p} d="M6 9l6 6 6-6" />;
+    const AlertTriangle = (p) => <Icon {...p}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icon>;
+    const Landmark = (p) => <Icon {...p}><line x1="3" y1="22" x2="21" y2="22" /><line x1="6" y1="18" x2="6" y2="11" /><line x1="10" y1="18" x2="10" y2="11" /><line x1="14" y1="18" x2="14" y2="11" /><line x1="18" y1="18" x2="18" y2="11" /><polygon points="12 2 20 7 4 7" /></Icon>;
+    const Plus = (p) => <Icon {...p} d="M12 5v14M5 12h14" />;
+    const ClipboardList = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" /><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3" /><path d="M9 12h6M9 16h6M9 8h.01" /></Icon>;
+    const CalendarDays = (p) => <Icon {...p}><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></Icon>;
+    const UserPlus = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="17" y1="11" x2="23" y2="11" /></Icon>;
+    const FileText = (p) => <Icon {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="16" y2="17" /></Icon>;
+    const Clock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></Icon>;
+    const CheckCircle2 = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></Icon>;
+    const XCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></Icon>;
+    const BriefcaseBusiness = (p) => <Icon {...p}><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /><line x1="2" y1="13" x2="22" y2="13" /></Icon>;
+    const Send = (p) => <Icon {...p} d="m22 2-7 20-4-9-9-4Z M22 2 11 13" />;
+    const Gauge = (p) => <Icon {...p}><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></Icon>;
+    const BookOpen = (p) => <Icon {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+    const Trophy = (p) => <Icon {...p}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></Icon>;
+    const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></Icon>;
+    const FilePlus = (p) => <Icon {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></Icon>;
+    const Download = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></Icon>;
+    const UserCog = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><circle cx="19" cy="11" r="2"/><path d="M19 8v1M19 13v1M16.6 9.5l.87.5M21.4 12l.87.5M16.6 12.5l.87-.5M21.4 10l.87-.5"/></Icon>;
+    const Phone = (p) => <Icon {...p} d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91A16 16 0 0 0 16 17l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/>;
+    const IdCard = (p) => <Icon {...p}><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="16" y1="10" x2="21" y2="10"/><line x1="16" y1="14" x2="21" y2="14"/><circle cx="8" cy="12" r="3"/><path d="M4 19v-1a4 4 0 0 1 8 0v1"/></Icon>;
+
+
+
+const initialEmployees = [
+  { id: 10008, name: "Kamran Sheikh", role: "Supervisor", basic: 60000, tt: 158, quality: 91, loan: 0, advance: 0, tax: 1500, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10005, name: "R Tariq", role: "Supervisor", basic: 60000, tt: 163, quality: 92, loan: 0, advance: 0, tax: 1500, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10041, name: "Adeel Farooq", role: "Supervisor", basic: 60000, tt: 162, quality: 92, loan: 0, advance: 0, tax: 1500, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10011, name: "Bilal Nadeem", role: "Supervisor", basic: 60000, tt: 158, quality: 96, loan: 0, advance: 0, tax: 1500, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10010, name: "Sana Yousaf", role: "TSR", basic: 45000, tt: 202, quality: 78, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10014, name: "Waqas Iqbal", role: "CSR", basic: 45000, tt: 199, quality: 81, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10035, name: "Hina Saleem", role: "CSR", basic: 45000, tt: 173, quality: 82, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10031, name: "Kashif Mehmood", role: "TSR", basic: 45000, tt: 181, quality: 83, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10100, name: "Danish Khalid", role: "CSR", basic: 45000, tt: 204, quality: 80, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10084, name: "Salman Yaqoob", role: "TSR", basic: 45000, tt: 203, quality: 82, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10133, name: "Umar Siddiqui", role: "CSR", basic: 45000, tt: 198, quality: 87, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10142, name: "Fahad Rauf", role: "CSR", basic: 45000, tt: 200, quality: 88, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10146, name: "Junaid Aslam", role: "CSR", basic: 45000, tt: 172, quality: 85, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10155, name: "Haris", role: "CSR", basic: 45000, tt: 199, quality: 90, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10156, name: "Mahnoor", role: "TSR", basic: 45000, tt: 185, quality: 80, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10157, name: "Noman Zafar", role: "TSR", basic: 45000, tt: 181, quality: 86, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10198, name: "Shahzad Anwar", role: "CSR", basic: 45000, tt: 178, quality: 82, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10212, name: "Ayaan Riaz", role: "CSR", basic: 45000, tt: 196, quality: 83, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10211, name: "Tariq Shahzad", role: "CSR", basic: 45000, tt: 194, quality: 91, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10214, name: "Zeeshan Bashir", role: "TSR", basic: 45000, tt: 206, quality: 84, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10215, name: "Imran Wahab", role: "TSR", basic: 45000, tt: 170, quality: 90, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10216, name: "Ayesha Kamal", role: "TSR", basic: 45000, tt: 202, quality: 79, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10136, name: "Rashid Latif", role: "TSR", basic: 45000, tt: 192, quality: 78, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10224, name: "Faizan Rafiq", role: "TSR", basic: 45000, tt: 203, quality: 85, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10225, name: "Sadia Hameed", role: "TSR", basic: 45000, tt: 208, quality: 95, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10240, name: "Rabia Nawaz", role: "TSR", basic: 45000, tt: 191, quality: 94, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10243, name: "Adnan Sarwar", role: "TSR", basic: 45000, tt: 180, quality: 78, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10247, name: "Usman Ghani", role: "TSR", basic: 45000, tt: 170, quality: 83, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 },
+  { id: 10248, name: "Kamil Yousuf", role: "TSR", basic: 45000, tt: 186, quality: 78, loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 }
+];
+
+// detail: LA = minutes late | ED/EX = hours (decimal) | others = ""
+const initialAttendanceLog = [
+  { id: 1,  empId: 10010, date: "2026-09-03", type: "LA",      detail: "20"   },
+  { id: 2,  empId: 10010, date: "2026-09-08", type: "LA",      detail: "32"   },
+  { id: 3,  empId: 10010, date: "2026-09-11", type: "LA",      detail: "11"   },
+  { id: 4,  empId: 10010, date: "2026-09-11", type: "ED",      detail: "1.33" },
+  { id: 5,  empId: 10010, date: "2026-09-10", type: "CALLOUT", detail: ""     },
+  { id: 6,  empId: 10031, date: "2026-09-05", type: "CALLOUT", detail: ""     },
+  { id: 7,  empId: 10031, date: "2026-09-14", type: "LA",      detail: "25"   },
+  { id: 8,  empId: 10031, date: "2026-09-22", type: "EXSHIFT", detail: ""     },
+  { id: 9,  empId: 10035, date: "2026-09-09", type: "EX",      detail: "2"    },
+  { id: 10, empId: 10146, date: "2026-09-06", type: "CALLOUT", detail: ""     },
+  { id: 11, empId: 10146, date: "2026-09-16", type: "NCNS",    detail: ""     },
+  { id: 12, empId: 10146, date: "2026-09-19", type: "UL",      detail: ""     },
+  { id: 13, empId: 10146, date: "2026-09-02", type: "LA",      detail: "18"   },
+  { id: 14, empId: 10041, date: "2026-09-04", type: "EX",      detail: "3"    },
+  { id: 15, empId: 10041, date: "2026-09-25", type: "EXSHIFT", detail: ""     },
+  { id: 16, empId: 10133, date: "2026-09-07", type: "CALLOUT", detail: ""     },
+  { id: 17, empId: 10084, date: "2026-09-17", type: "ED",      detail: "1"    },
+  { id: 18, empId: 10005, date: "2026-09-12", type: "LA",      detail: "15"   },
+  { id: 19, empId: 10214, date: "2026-09-18", type: "LA",      detail: "22"   },
+  { id: 20, empId: 10225, date: "2026-09-21", type: "EXSHIFT", detail: ""     },
+];
+
+const TYPE_LABEL = { LA: "Late Arrival", CALLOUT: "Call Out", ED: "Early Departure", EX: "Extra Hours", EXSHIFT: "Extra Shift", NCNS: "NCNS", UL: "Unpaid Leave" };
+// ======================================================
+// HR MANAGER DEMO DATA
+// ======================================================
+
+const SHIFT_OPTIONS = {
+  first: {
+    label: "First Shift",
+    timing: "10:00 PM – 7:00 AM",
+  },
+  second: {
+    label: "Second Shift",
+    timing: "2:45 AM – 12:00 PM",
+  },
+};
+
+const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const initialWeeklySchedule = [
+  { id: 1,  empId: 10008, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 2,  empId: 10005, shift: "second", monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 3,  empId: 10041, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 4,  empId: 10011, shift: "second", monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 5,  empId: 10010, shift: "first",  monday: "Custom", tuesday: "Custom", wednesday: "OFF",  thursday: "Custom", friday: "OFF",  saturday: "Custom", sunday: "Custom",
+    customHours: { monday: { start: "23:00", end: "04:00" }, tuesday: { start: "23:00", end: "04:00" }, thursday: { start: "23:00", end: "04:00" }, saturday: { start: "23:00", end: "04:00" }, sunday: { start: "23:00", end: "04:00" } } },
+  { id: 6,  empId: 10014, shift: "second", monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 7,  empId: 10035, shift: "first",  monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "Work" },
+  { id: 8,  empId: 10031, shift: "second", monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 9,  empId: 10100, shift: "first",  monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 10, empId: 10084, shift: "second", monday: "Work", tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 11, empId: 10133, shift: "first",  monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 12, empId: 10142, shift: "second", monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 13, empId: 10146, shift: "first",  monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 14, empId: 10155, shift: "second", monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "Work" },
+  { id: 15, empId: 10156, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 16, empId: 10157, shift: "second", monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 17, empId: 10198, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 18, empId: 10212, shift: "second", monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 19, empId: 10211, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 20, empId: 10214, shift: "second", monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 21, empId: 10215, shift: "first",  monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "Work" },
+  { id: 22, empId: 10216, shift: "second", monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 23, empId: 10136, shift: "first",  monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 24, empId: 10224, shift: "second", monday: "Work", tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 25, empId: 10225, shift: "first",  monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" },
+  { id: 26, empId: 10240, shift: "second", monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "OFF",  saturday: "Work", sunday: "Work" },
+  { id: 27, empId: 10243, shift: "first",  monday: "Work", tuesday: "OFF",  wednesday: "Work", thursday: "Work", friday: "Work", saturday: "Work", sunday: "OFF"  },
+  { id: 28, empId: 10247, shift: "second", monday: "OFF",  tuesday: "Work", wednesday: "Work", thursday: "OFF",  friday: "Work", saturday: "Work", sunday: "Work" },
+  { id: 29, empId: 10248, shift: "first",  monday: "Work", tuesday: "Work", wednesday: "OFF",  thursday: "Work", friday: "Work", saturday: "OFF",  sunday: "Work" }
+];
+
+const initialScheduleRequests = [
+  { id: 1, empId: 10010, requestedDate: "2026-09-30", currentOff: "Wednesday", requestedOff: "Friday",   reason: "Family commitment",    status: "Pending"  },
+  { id: 2, empId: 10031, requestedDate: "2026-10-02", currentOff: "Wednesday", requestedOff: "Saturday", reason: "Personal appointment", status: "Pending"  },
+  { id: 3, empId: 10146, requestedDate: "2026-10-03", currentOff: "Sunday",    requestedOff: "Friday",   reason: "Family event",         status: "Approved" },
+];
+
+const initialSalaryAdvances = [
+  { id: 1, empId: 10133, date: "2026-09-18", amount: 10000, reason: "Emergency family expense", status: "Pending"  },
+  { id: 2, empId: 10084, date: "2026-09-19", amount: 15000, reason: "Medical expense",          status: "Pending"  },
+  { id: 3, empId: 10041, date: "2026-09-10", amount: 8000,  reason: "Personal requirement",     status: "Approved" },
+];
+
+const initialHRTasks = [
+  { id: 1, empId: 10248, task: "Issuance of Account Opening Letter",  dueDate: "2026-09-25", status: "Pending",   notes: "Issue bank account opening letter for new hire." },
+  { id: 2, empId: 10247, task: "Provisional Training Offer Letter",   dueDate: "2026-09-26", status: "Completed", notes: "Training offer issued and signed."               },
+  { id: 3, empId: 10146, task: "Warning Letter",                      dueDate: "2026-09-27", status: "Pending",   notes: "Prepare warning letter for attendance issue."    },
+  { id: 4, empId: 10155, task: "Final Settlement Letter",             dueDate: "2026-09-29", status: "Pending",   notes: "Prepare final settlement documentation."         },
+  { id: 5, empId: 10243, task: "Initial Interview",                   dueDate: "2026-09-24", status: "Completed", notes: "Initial interview completed successfully."        },
+  { id: 6, empId: 10240, task: "Final Interview",                     dueDate: "2026-09-28", status: "Pending",   notes: "Final interview scheduled with management."      },
+  { id: 7, empId: 10214, task: "Other HR Task",                      dueDate: "2026-10-01", status: "Pending",   notes: "Update employee documentation and records."      },
+];
+const initialBroadcasts = [
+  { id: 1, date: "2026-01-15", postedBy: "Adeel Farooq",   text: "New winter menu items added: Cheesy Garlic Bread Rolls and Hot Wings Combo. Please review the updated menu board before your next shift." },
+  { id: 2, date: "2026-03-02", postedBy: "Kamran Sheikh",      text: "Card payment on delivery is now available in all zones. Confirm with the customer before dispatch and note it clearly on the order." },
+  { id: 3, date: "2026-05-20", postedBy: "R Tariq",        text: "Ramadan promotion: Buy 1 Get 1 Free on all medium pizzas, 7pm–10pm daily. Offer applies to phone orders only, not walk-ins." },
+  { id: 4, date: "2026-07-10", postedBy: "Bilal Nadeem", text: "New guideline: always confirm the delivery address twice for orders above Rs 3,000, and read it back to the customer before ending the call." },
+  { id: 5, date: "2026-09-20", postedBy: "Kamran Sheikh",      text: "September Quiz will be held on 2026-09-20." },
+  { id: 6, date: "2026-09-25", postedBy: "Adeel Farooq",   text: "October shift roster has been posted. Please confirm your slot by Friday." },
+  { id: 7, date: "2026-09-27", postedBy: "Kamran Sheikh",      text: "URGENT: New Spicy Chicken Zinger Pizza launches today. Mention it as an upsell on every call — script has been shared with team leads." },
+];
+// Seed history: everyone has already read every update except the newest one (id 7),
+// so a fresh login only prompts for what's actually new — the way this would behave in production.
+const initialAcknowledgements = initialEmployees
+  .filter(e => e.role === "TSR" || e.role === "CSR" || e.role === "Supervisor")
+  .flatMap(e => initialBroadcasts.filter(u => u.id !== 7).map(u => ({ empId: e.id, updateId: u.id, timestamp: "Previously acknowledged" })));
+const initialPrivateMsgs = [
+  { id: 1, empId: 10010, text: "Your CS Revision session has been scheduled tomorrow with Adeel Farooq (10041)." },
+  { id: 2, empId: 10146, text: "Please see HR regarding repeated late arrivals and NCNS this month."             },
+  { id: 3, empId: 10133, text: "Your salary advance request is under review. Decision expected by end of week."  },
+];
+const initialExpenses = [
+  { id: 1, date: "2026-09-02", category: "Rent", note: "Office rent — September", amount: 180000 },
+  { id: 2, date: "2026-09-05", category: "Utilities", note: "Electricity bill", amount: 42000 },
+  { id: 3, date: "2026-09-08", category: "Vendor payment", note: "Internet & VoIP provider", amount: 65000 },
+];
+const initialErrors = [
+  { id: 1, empId: 10010, date: "2026-09-09", note: "Incorrect items on customer order", usd: 43 },
+  { id: 2, empId: 10031, date: "2026-09-06", note: "Wrong pizza added to order",        usd: 20 },
+  { id: 3, empId: 10146, date: "2026-09-11", note: "Missed customer's side item",       usd: 8  },
+  { id: 4, empId: 10100, date: "2026-09-14", note: "Duplicate order entry",             usd: 15 },
+  { id: 5, empId: 10216, date: "2026-09-17", note: "Wrong address noted on order",      usd: 12 },
+];
+const initialMiscRequests = [
+  { id: 1, empId: 10035, type: "Leave",   date: "2026-09-28", details: "Paid leave — family function on Oct 5",   status: "Pending"   },
+  { id: 2, empId: 10133, type: "Payslip", date: "2026-09-15", details: "Requesting August 2026 payslip copy",     status: "Fulfilled" },
+];
+
+const RATES = { incentivePool: 25000, calloutDed: 3000, ncnsDed: 5000, ulDed: 2500, lateDed: 200, edRate: 250, extraHourRate: 250, extraShift: 3500 };
+
+function ttDeduction(tt) {
+  if (tt < 176) return 0;
+  if (tt >= 199) return 7000;
+  if (tt >= 190) return 5000;
+  if (tt >= 185) return 4000;
+  if (tt >= 180) return 3000;
+  return 2000;
+}
+// "or below" tiers — worst applicable tier only; above 91% = no deduction
+function qualityDeduction(q) {
+  if (q <= 80) return 4000;
+  if (q <= 85) return 3000;
+  if (q <= 87) return 2200;
+  if (q <= 88) return 1600;
+  if (q <= 89) return 920;
+  if (q <= 91) return 400;
+  return 0;
+}
+function tallyAttendance(empId, log) {
+  const rows = log.filter((l) => l.empId === empId);
+  const t = { late: 0, callout: 0, ncns: 0, ul: 0, edHours: 0, exHours: 0, extraShifts: 0 };
+  rows.forEach((r) => {
+    if (r.type === "LA") t.late++;
+    else if (r.type === "CALLOUT") t.callout++;
+    else if (r.type === "NCNS") t.ncns++;
+    else if (r.type === "UL") t.ul++;
+    else if (r.type === "ED") t.edHours += Number(r.detail) || 0;
+    else if (r.type === "EX") t.exHours += Number(r.detail) || 0;
+    else if (r.type === "EXSHIFT") t.extraShifts++;
+  });
+  t.edHours = Math.round(t.edHours * 100) / 100;
+  t.exHours = Math.round(t.exHours * 100) / 100;
+  return t;
+}
+function computePay(e, att, errorUsdTotal, errorRate) {
+  const ttDed = ttDeduction(e.tt);
+  const qDed = qualityDeduction(e.quality);
+  const incentive = Math.max(0, RATES.incentivePool - ttDed - qDed);
+  const overtimePay = att.exHours * RATES.extraHourRate;
+  const extraShiftPay = att.extraShifts * RATES.extraShift;
+  const calloutPen = att.callout * RATES.calloutDed;
+  const ncnsPen = att.ncns * RATES.ncnsDed;
+  const ulPen = att.ul * RATES.ulDed;
+  const latePen = att.late * RATES.lateDed;
+  const edPen = Math.round(att.edHours * RATES.edRate);
+  const errorPen = Math.round(errorUsdTotal * errorRate);
+  const gross = e.basic + incentive + overtimePay + extraShiftPay + e.arrears + e.specialReward;
+  const deductions = calloutPen + ncnsPen + ulPen + latePen + edPen + e.loan + e.advance + e.tax + e.noticePeriod + e.fine + errorPen;
+  return { ttDed, qDed, incentive, overtimePay, extraShiftPay, calloutPen, ncnsPen, ulPen, latePen, edPen, errorPen, gross, deductions, net: gross - deductions };
+}
+function money(n) { return "Rs " + Math.round(n).toLocaleString("en-PK"); }
+function hrsLabel(h) {
+  const whole = Math.floor(h);
+  const mins = Math.round((h - whole) * 60);
+  return mins ? `${whole}h ${mins}m` : `${whole}h`;
+}
+function scheduleBadgeClasses(value) {
+  if (value === "OFF") return { wrap: "bg-amber-50 border-amber-200", text: "text-amber-700", pill: "bg-amber-100 text-amber-700" };
+  if (value === "Unpaid Leave") return { wrap: "bg-rose-50 border-rose-200", text: "text-rose-700", pill: "bg-rose-100 text-rose-700" };
+  if (value === "Paid Leave") return { wrap: "bg-sky-50 border-sky-200", text: "text-sky-700", pill: "bg-sky-100 text-sky-700" };
+  if (value === "Extra Shift") return { wrap: "bg-emerald-50 border-emerald-200", text: "text-emerald-700", pill: "bg-emerald-100 text-emerald-700" };
+  if (value === "Custom") return { wrap: "bg-indigo-50 border-indigo-200", text: "text-indigo-700", pill: "bg-indigo-100 text-indigo-700" };
+  return { wrap: "border-slate-200", text: "text-slate-700", pill: "bg-slate-100 text-slate-600" };
+}
+// Base shift duration (hours) for a given shift key + day name.
+// Fri/Sat run 1 hour longer on both shifts; Sunday on Second Shift ends 1 hour earlier.
+function baseShiftHours(shiftKey, dayName) {
+  if (shiftKey === "first") {
+    if (dayName === "Friday" || dayName === "Saturday") return 10;
+    return 9;
+  }
+  if (shiftKey === "second") {
+    if (dayName === "Friday" || dayName === "Saturday") return 10.25;
+    if (dayName === "Sunday") return 8.25;
+    return 9.25;
+  }
+  return 0;
+}
+function formatTime12(t) {
+  if (!t) return "";
+  const [hStr, mStr] = t.split(":");
+  let h = Number(hStr);
+  const period = h >= 12 ? "PM" : "AM";
+  h = h % 12; if (h === 0) h = 12;
+  return `${h}:${mStr} ${period}`;
+}
+function customRangeHours(start, end) {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  let startMin = sh * 60 + sm, endMin = eh * 60 + em;
+  if (endMin <= startMin) endMin += 24 * 60; // overnight shift
+  return (endMin - startMin) / 60;
+}
+function dayHours(row, dayName) {
+  const key = dayName.toLowerCase();
+  const status = row[key];
+  if (status === "Work" || status === "Extra Shift") return baseShiftHours(row.shift, dayName);
+  if (status === "Custom") {
+    const c = row.customHours && row.customHours[key];
+    return c ? customRangeHours(c.start, c.end) : 0;
+  }
+  return 0; // OFF, Unpaid Leave, Paid Leave
+}
+function totalWeeklyHours(row) {
+  return DAYS.reduce((sum, d) => sum + dayHours(row, d), 0);
+}
+// Calendar date for each entry in DAYS, given the Monday of that schedule week (YYYY-MM-DD)
+function weekDayDates(mondayStr) {
+  const monday = new Date(mondayStr + "T00:00:00");
+  return DAYS.map((_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  });
+}
+function requestStatusPill(status) {
+  if (status === "Approved" || status === "Fulfilled") return "bg-emerald-100 text-emerald-700";
+  if (status === "Rejected") return "bg-rose-100 text-rose-700";
+  return "bg-amber-100 text-amber-700";
+}
+
+function AizanERP() {
+  const [role, setRole] = useState("employee");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginId, setLoginId] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loggedInUser, setLoggedInUser] = useState(null); // { name, role, empId }
+  const [employees, setEmployees] = useState(initialEmployees);
+    // HR Manager state
+  const [weeklySchedule, setWeeklySchedule] = useState(initialWeeklySchedule);
+  const [scheduleRequests, setScheduleRequests] = useState(initialScheduleRequests);
+  const [salaryAdvances, setSalaryAdvances] = useState(initialSalaryAdvances);
+  const [hrTasks, setHrTasks] = useState(initialHRTasks);
+  const [scheduleWeek, setScheduleWeek] = useState("2026-09-28");
+  const [newTaskForm, setNewTaskForm] = useState({
+    empId: initialEmployees[0].id,
+    task: "Issuance of Account Opening Letter",
+    dueDate: "",
+    notes: "",
+  });
+  const [attendanceLog, setAttendanceLog] = useState(initialAttendanceLog);
+  const [broadcasts, setBroadcasts] = useState(initialBroadcasts);
+  const [privateMsgs, setPrivateMsgs] = useState(initialPrivateMsgs);
+  const [acknowledgements, setAcknowledgements] = useState(initialAcknowledgements); // [{empId, updateId, timestamp}]
+  const [showAckOverlay, setShowAckOverlay] = useState(false);
+  const [ackQueue, setAckQueue] = useState([]); // unread updates the logged-in user must acknowledge before dashboard unlocks
+  const [expenses, setExpenses] = useState(initialExpenses);
+  const [errors, setErrors] = useState(initialErrors);
+  const [errorRate, setErrorRate] = useState(200);
+  const [selectedId, setSelectedId] = useState(initialEmployees[0].id);
+  const [newBroadcast, setNewBroadcast] = useState("");
+  const [privateTarget, setPrivateTarget] = useState(initialEmployees[0].id);
+  const [privateText, setPrivateText] = useState("");
+  const [expForm, setExpForm] = useState({ date: "", category: "Rent", note: "", amount: "" });
+  const [errForm, setErrForm] = useState({ empId: initialEmployees[0].id, date: "", note: "", usd: "" });
+  const [attForm, setAttForm] = useState({ empId: initialEmployees[0].id, date: "", type: "LA", detail: "" });
+  const [payrollMsg, setPayrollMsg] = useState("");
+  const [miscRequests, setMiscRequests] = useState(initialMiscRequests);
+  const [reqType, setReqType] = useState(null);
+  const [reqForm, setReqForm] = useState({ requestedDate: "", requestedOff: "Monday", amount: "", leaveType: "Paid", reason: "" });
+
+  // ── CPD Exercise state ────────────────────────────────────────────────────
+  const CPD_EXERCISE = {
+    id: "cpd-001",
+    title: "Customer Service English — B1",
+    passage: `Working in a customer service role requires clear and polite communication. When a customer calls with a complaint, it is important to listen carefully before responding. You should never interrupt the customer while they are speaking, even if you already know the solution to their problem.\n\nOnce the customer has finished explaining, acknowledge their concern by saying something like "I completely understand how frustrating that must be." This shows empathy and helps to calm the situation. After acknowledging the issue, explain what steps you will take to resolve it, and give the customer a realistic time frame.\n\nAvoid using technical jargon or company-specific terms that the customer may not understand. Always speak in simple, clear English. If you are unsure about something, it is better to say "Let me check that for you" rather than guessing. Customers appreciate honesty more than a confident but incorrect answer.\n\nFinally, always end the call by summarising what was agreed and thanking the customer for their patience. A positive closing leaves a good impression, even if the issue was not fully resolved during the call.`,
+    questions: [
+      { id: 1, q: "What should you do when a customer is still explaining their problem?", options: ["Interrupt and offer the solution immediately", "Listen carefully without interrupting", "Put them on hold", "Transfer the call"], answer: 1 },
+      { id: 2, q: "Which phrase best shows empathy to a frustrated customer?", options: ["That is not our fault.", "Please hold.", "I completely understand how frustrating that must be.", "You should have read the terms."], answer: 2 },
+      { id: 3, q: "What does the passage say about using technical jargon?", options: ["It makes you sound more professional", "Customers prefer it", "You should avoid it and use simple English", "Use it only with older customers"], answer: 2 },
+      { id: 4, q: "What should you say if you are unsure about an answer?", options: ["Make a confident guess", "Say nothing and wait", "Let me check that for you", "End the call politely"], answer: 2 },
+      { id: 5, q: "How should you end a customer service call?", options: ["Hang up quickly to save time", "Ask the customer to call back", "Summarise what was agreed and thank the customer", "Transfer to a manager"], answer: 2 },
+    ]
+  };
+  const [cpdResults, setCpdResults] = useState([]); // [{empId, date, score, total, timeTaken}]
+  const [cpdPhase, setCpdPhase] = useState("idle"); // idle | reading | quiz | done
+  const [cpdAnswers, setCpdAnswers] = useState({});
+  const [cpdReadStart, setCpdReadStart] = useState(null);
+  const [cpdQuizStart, setCpdQuizStart] = useState(null);
+  const [showCpdExpand, setShowCpdExpand] = useState(false);
+
+  function startCpdExercise() {
+    setCpdPhase("reading");
+    setCpdReadStart(Date.now());
+    setCpdAnswers({});
+  }
+  function startCpdQuiz() {
+    setCpdPhase("quiz");
+    setCpdQuizStart(Date.now());
+  }
+  function submitCpdQuiz() {
+    const correct = CPD_EXERCISE.questions.filter(q => cpdAnswers[q.id] === q.answer).length;
+    const total = CPD_EXERCISE.questions.length;
+    const timeSec = Math.round((Date.now() - cpdReadStart) / 1000);
+    const today2 = new Date().toISOString().slice(0, 10);
+    setCpdResults(prev => [{ empId: selected?.id, date: today2, score: correct, total, timeTaken: timeSec }, ...prev.filter(r => r.empId !== selected?.id)]);
+    setCpdPhase("done");
+  }
+  function myLatestCpd(empId) { return cpdResults.find(r => r.empId === empId); }
+  // ── HR Tabs ───────────────────────────────────────────────────────────────
+  const [hrTab, setHrTab] = useState("schedule");
+  const [supervisorTab, setSupervisorTab] = useState("schedule");
+  const [perfEmpId, setPerfEmpId] = useState(initialEmployees[0].id);
+  // Employee Details
+  const [empDetails, setEmpDetails] = useState(initialEmployees.map(e => ({
+    id: e.id, phone: "", address: "", emergencyContact: "", cnic: "",
+    campaign: "A", status: "Contract"
+  })));
+  const [showAddEmp, setShowAddEmp] = useState(false);
+  const [newEmpForm, setNewEmpForm] = useState({
+    name: "", id: "", role: "CSR", basic: 45000, tt: 180, quality: 90,
+    loan: 0, advance: 0, tax: 800, arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0,
+    phone: "", address: "", emergencyContact: "", cnic: "", campaign: "A", status: "Probation"
+  });
+  function saveEmpDetail(id, field, value) {
+    setEmpDetails(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
+  }
+  function addNewEmployee() {
+    if (!newEmpForm.name || !newEmpForm.id) return;
+    const numId = Number(newEmpForm.id);
+    const emp = { id: numId, name: newEmpForm.name, role: newEmpForm.role,
+      basic: Number(newEmpForm.basic), tt: Number(newEmpForm.tt), quality: Number(newEmpForm.quality),
+      loan: 0, advance: 0, tax: Number(newEmpForm.tax), arrears: 0, specialReward: 0, noticePeriod: 0, fine: 0 };
+    setEmployees(prev => [...prev, emp]);
+    setEmpDetails(prev => [...prev, { id: numId, phone: newEmpForm.phone, address: newEmpForm.address,
+      emergencyContact: newEmpForm.emergencyContact, cnic: newEmpForm.cnic,
+      campaign: newEmpForm.campaign, status: newEmpForm.status }]);
+    setWeeklySchedule(prev => [...prev, { id: Date.now(), empId: numId, shift: "first",
+      monday:"Work", tuesday:"Work", wednesday:"OFF", thursday:"Work", friday:"Work", saturday:"OFF", sunday:"Work" }]);
+    setShowAddEmp(false);
+    setNewEmpForm({ name:"", id:"", role:"CSR", basic:45000, tt:180, quality:90, loan:0, advance:0, tax:800,
+      arrears:0, specialReward:0, noticePeriod:0, fine:0, phone:"", address:"", emergencyContact:"",
+      cnic:"", campaign:"A", status:"Probation" });
+  }
+
+  // ── Shift Report state ────────────────────────────────────────────────────
+  const today = new Date().toISOString().slice(0, 10);
+  const [shiftReportDate, setShiftReportDate] = useState(today);
+  const [compiledBy, setCompiledBy] = useState("Adeel Farooq");
+  // Each row: { id, subject, empId, arrivalTime, details }
+  const REPORT_SUBJECTS = ["Late Arrival", "Call Out", "Early Departure", "Extra Hours", "Extra Shift", "NCNS", "Unpaid Leave"];
+  const SUBJECT_TO_TYPE = { "Late Arrival": "LA", "Call Out": "CALLOUT", "Early Departure": "ED", "Extra Hours": "EX", "Extra Shift": "EXSHIFT", "NCNS": "NCNS", "Unpaid Leave": "UL" };
+  const initialReportRows = [
+    { id: 1, subject: "Late Arrival",    empId: "", arrivalTime: "", details: "" },
+    { id: 2, subject: "Late Arrival",    empId: "", arrivalTime: "", details: "" },
+    { id: 3, subject: "Late Arrival",    empId: "", arrivalTime: "", details: "" },
+    { id: 4, subject: "Call Out",        empId: "", arrivalTime: "", details: "" },
+    { id: 5, subject: "Call Out",        empId: "", arrivalTime: "", details: "" },
+    { id: 6, subject: "Early Departure", empId: "", arrivalTime: "", details: "" },
+    { id: 7, subject: "Extra Hours",     empId: "", arrivalTime: "", details: "" },
+    { id: 8, subject: "Extra Shift",     empId: "", arrivalTime: "", details: "" },
+  ];
+  const [reportRows, setReportRows] = useState(initialReportRows);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+
+  function updateReportRow(id, field, value) {
+    setReportRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  }
+  function addReportRow() {
+    const newId = Date.now();
+    setReportRows(prev => [...prev, { id: newId, subject: "Late Arrival", empId: "", arrivalTime: "", details: "" }]);
+  }
+  function removeReportRow(id) {
+    setReportRows(prev => prev.filter(r => r.id !== id));
+  }
+  function submitShiftReport() {
+    const filledRows = reportRows.filter(r => r.empId && r.subject);
+    if (!filledRows.length || !shiftReportDate) return;
+    const newEvents = filledRows.map(r => {
+      const type = SUBJECT_TO_TYPE[r.subject] || "LA";
+      let detail = "";
+      if (type === "LA" && r.arrivalTime) detail = r.arrivalTime; // store arrival time as detail for LA
+      if (type === "ED" && r.details) detail = r.details;
+      if (type === "EX" && r.details) detail = r.details;
+      return { id: Date.now() + Math.random(), empId: Number(r.empId), date: shiftReportDate, type, detail, note: r.details };
+    });
+    setAttendanceLog(prev => [...newEvents, ...prev]);
+    setReportSubmitted(true);
+    setTimeout(() => setReportSubmitted(false), 3000);
+  }
+
+  const updatesByDate = useMemo(() => {
+    const groups = {};
+    [...broadcasts]
+      .sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.id - a.id)
+      .forEach((u) => {
+        const d = u.date || "Undated";
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(u);
+      });
+    return Object.entries(groups).map(([date, items]) => ({ date, items }));
+  }, [broadcasts]);
+  const myUnreadCount = loggedInUser?.empId ? unreadUpdatesFor(loggedInUser.empId).length : 0;
+
+  const errorTotalsByEmp = useMemo(() => {
+    const m = {};
+    errors.forEach((x) => { m[x.empId] = (m[x.empId] || 0) + x.usd; });
+    return m;
+  }, [errors]);
+
+  const attByEmp = useMemo(() => {
+    const m = {};
+    employees.forEach((e) => { m[e.id] = tallyAttendance(e.id, attendanceLog); });
+    return m;
+  }, [employees, attendanceLog]);
+
+  const selected = employees.find((e) => e.id === selectedId);
+  const selAtt = selected ? attByEmp[selected.id] : null;
+  const pay = useMemo(() => (selected ? computePay(selected, selAtt, errorTotalsByEmp[selected.id] || 0, errorRate) : null), [selected, selAtt, errorTotalsByEmp, errorRate]);
+  const allPay = useMemo(() => employees.map((e) => ({ ...e, att: attByEmp[e.id], ...computePay(e, attByEmp[e.id], errorTotalsByEmp[e.id] || 0, errorRate) })), [employees, attByEmp, errorTotalsByEmp, errorRate]);
+  const totals = useMemo(() => ({
+    headcount: employees.length,
+    payroll: allPay.reduce((s, e) => s + e.net, 0),
+    incentives: allPay.reduce((s, e) => s + e.incentive, 0),
+    deductions: allPay.reduce((s, e) => s + e.deductions, 0),
+  }), [allPay, employees.length]);
+  const totalExpenses = expenses.reduce((s, x) => s + x.amount, 0);
+  const myRequests = useMemo(() => {
+    if (!selected) return [];
+    const off = scheduleRequests.filter((r) => r.empId === selected.id).map((r) => ({ id: `sr${r.id}`, label: `Off change → ${r.requestedOff} on ${r.requestedDate}`, status: r.status }));
+    const adv = salaryAdvances.filter((r) => r.empId === selected.id).map((r) => ({ id: `sa${r.id}`, label: `Salary advance — ${money(r.amount)}`, status: r.status }));
+    const misc = miscRequests.filter((r) => r.empId === selected.id).map((r) => ({ id: `mr${r.id}`, label: `${r.type} — ${r.details}`, status: r.status }));
+    return [...off, ...adv, ...misc];
+  }, [selected, scheduleRequests, salaryAdvances, miscRequests]);
+
+  function updateField(id, field, value) { setEmployees((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: Number(value) || 0 } : e))); }
+  function postBroadcast() {
+    if (!newBroadcast.trim()) return;
+    setBroadcasts((p) => [{ id: Date.now(), date: today, postedBy: loggedInUser?.name || "Supervisor", text: newBroadcast.trim() }, ...p]);
+    setNewBroadcast("");
+  }
+  function deleteBroadcast(id) {
+    if (!window.confirm("Delete this update for everyone? This can't be undone.")) return;
+    setBroadcasts((p) => p.filter((u) => u.id !== id));
+    setAcknowledgements((p) => p.filter((a) => a.updateId !== id));
+  }
+  function acknowledgeUpdate(updateId) {
+    if (!loggedInUser?.empId) return;
+    setAcknowledgements((p) => {
+      if (p.some((a) => a.empId === loggedInUser.empId && a.updateId === updateId)) return p;
+      const timestamp = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      return [...p, { empId: loggedInUser.empId, updateId, timestamp }];
+    });
+  }
+  function handleAcknowledgeCurrent() {
+    const current = ackQueue[0];
+    if (!current) return;
+    acknowledgeUpdate(current.id);
+    const rest = ackQueue.slice(1);
+    setAckQueue(rest);
+    if (rest.length === 0) setShowAckOverlay(false);
+  }
+  function formatUpdateDate(iso) {
+    if (!iso) return "Undated";
+    const d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  }
+  function unreadUpdatesFor(empId) {
+    if (!empId) return [];
+    return broadcasts
+      .filter((u) => !acknowledgements.some((a) => a.empId === empId && a.updateId === u.id))
+      .sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.id - b.id);
+  }
+  function postPrivate() { if (!privateText.trim()) return; setPrivateMsgs((p) => [{ id: Date.now(), empId: Number(privateTarget), text: privateText.trim() }, ...p]); setPrivateText(""); }
+  function addExpense() { if (!expForm.date || !expForm.amount) return; setExpenses((p) => [{ id: Date.now(), ...expForm, amount: Number(expForm.amount) || 0 }, ...p]); setExpForm({ date: "", category: "Rent", note: "", amount: "" }); }
+  function addError() { if (!errForm.date || !errForm.usd) return; setErrors((p) => [{ id: Date.now(), empId: Number(errForm.empId), date: errForm.date, note: errForm.note, usd: Number(errForm.usd) || 0 }, ...p]); setErrForm({ empId: errForm.empId, date: "", note: "", usd: "" }); }
+  function addAttendance() { if (!attForm.date) return; setAttendanceLog((p) => [{ id: Date.now(), empId: Number(attForm.empId), date: attForm.date, type: attForm.type, detail: attForm.detail }, ...p]); setAttForm({ empId: attForm.empId, date: "", type: attForm.type, detail: "" }); }
+  function submitRequest() {
+    if (!reqType || !selected) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (reqType === "Off") {
+      if (!reqForm.requestedDate || !reqForm.reason) return;
+      const mySchedule = weeklySchedule.find((x) => x.empId === selected.id);
+      const currentOff = (mySchedule && DAYS.find((d) => mySchedule[d.toLowerCase()] === "OFF")) || "Not set";
+      setScheduleRequests((p) => [{ id: Date.now(), empId: selected.id, requestedDate: reqForm.requestedDate, currentOff, requestedOff: reqForm.requestedOff, reason: reqForm.reason, status: "Pending" }, ...p]);
+    } else if (reqType === "Advance") {
+      if (!reqForm.amount || !reqForm.reason) return;
+      setSalaryAdvances((p) => [{ id: Date.now(), empId: selected.id, date: today, amount: Number(reqForm.amount) || 0, reason: reqForm.reason, status: "Pending" }, ...p]);
+    } else if (reqType === "Leave") {
+      if (!reqForm.requestedDate || !reqForm.reason) return;
+      setMiscRequests((p) => [{ id: Date.now(), empId: selected.id, type: "Leave", date: reqForm.requestedDate, details: `${reqForm.leaveType} leave — ${reqForm.reason}`, status: "Pending" }, ...p]);
+    } else if (reqType === "Payslip") {
+      if (!reqForm.reason) return;
+      setMiscRequests((p) => [{ id: Date.now(), empId: selected.id, type: "Payslip", date: today, details: reqForm.reason, status: "Pending" }, ...p]);
+    }
+    setReqForm({ requestedDate: "", requestedOff: "Monday", amount: "", leaveType: "Paid", reason: "" });
+    setReqType(null);
+  }
+    // ======================================================
+  // HR FUNCTIONS
+  // ======================================================
+
+  function updateScheduleCell(scheduleId, day, value) {
+    setWeeklySchedule((prev) =>
+      prev.map((row) => {
+        if (row.id !== scheduleId) return row;
+        const next = { ...row, [day]: value };
+        if (value === "Custom" && !(row.customHours && row.customHours[day])) {
+          next.customHours = { ...(row.customHours || {}), [day]: { start: "", end: "" } };
+        }
+        return next;
+      })
+    );
+  }
+
+  function updateCustomHours(scheduleId, day, field, value) {
+    setWeeklySchedule((prev) =>
+      prev.map((row) => {
+        if (row.id !== scheduleId) return row;
+        const existing = (row.customHours && row.customHours[day]) || { start: "", end: "" };
+        return { ...row, customHours: { ...(row.customHours || {}), [day]: { ...existing, [field]: value } } };
+      })
+    );
+  }
+
+  function updateScheduleShift(scheduleId, shift) {
+    setWeeklySchedule((prev) =>
+      prev.map((row) =>
+        row.id === scheduleId
+          ? { ...row, shift }
+          : row
+      )
+    );
+  }
+
+  function approveScheduleRequest(id) {
+    setScheduleRequests((prev) =>
+      prev.map((request) =>
+        request.id === id
+          ? { ...request, status: "Approved" }
+          : request
+      )
+    );
+  }
+
+  function rejectScheduleRequest(id) {
+    setScheduleRequests((prev) =>
+      prev.map((request) =>
+        request.id === id
+          ? { ...request, status: "Rejected" }
+          : request
+      )
+    );
+  }
+
+  function approveSalaryAdvance(id) {
+    setSalaryAdvances((prev) =>
+      prev.map((request) =>
+        request.id === id
+          ? { ...request, status: "Approved" }
+          : request
+      )
+    );
+  }
+
+  function rejectSalaryAdvance(id) {
+    setSalaryAdvances((prev) =>
+      prev.map((request) =>
+        request.id === id
+          ? { ...request, status: "Rejected" }
+          : request
+      )
+    );
+  }
+
+  function toggleHRTask(id) {
+    setHrTasks((prev) =>
+      prev.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              status:
+                task.status === "Completed"
+                  ? "Pending"
+                  : "Completed",
+            }
+          : task
+      )
+    );
+  }
+
+  function addHRTask() {
+    if (!newTaskForm.empId || !newTaskForm.dueDate) return;
+
+    setHrTasks((prev) => [
+      {
+        id: Date.now(),
+        empId: Number(newTaskForm.empId),
+        task: newTaskForm.task,
+        dueDate: newTaskForm.dueDate,
+        status: "Pending",
+        notes: newTaskForm.notes,
+      },
+      ...prev,
+    ]);
+
+    setNewTaskForm({
+      empId: initialEmployees[0].id,
+      task: "Issuance of Account Opening Letter",
+      dueDate: "",
+      notes: "",
+    });
+  }
+  const numMd = "w-16 border border-slate-200 rounded px-1.5 py-1 text-center";
+  const needsDetail = attForm.type === "LA" || attForm.type === "ED" || attForm.type === "EX";
+
+  function detailLabel(a) {
+    if (!a.detail) return "";
+    if (a.type === "ED" || a.type === "EX") return hrsLabel(Number(a.detail) || 0);
+    if (a.type === "LA") return `${a.detail} min late`;
+    return a.detail;
+  }
+
+  // ── Login handler ─────────────────────────────────────────────────────────
+  function handleLogin() {
+    setLoginError("");
+    const id = loginId.trim();
+    const pass = loginPass.trim();
+    if (!id || !pass) { setLoginError("Please enter your Employee ID and password."); return; }
+    if (pass !== "12345") { setLoginError("Incorrect password. Please try again."); return; }
+
+    // HR special account
+    if (id.toLowerCase() === "hr manager") {
+      setLoggedInUser({ name: "HR Manager", role: "hr", empId: null });
+      setRole("hr");
+      setLoggedIn(true);
+      return;
+    }
+
+    // Employee ID lookup
+    const numId = Number(id);
+    const emp = employees.find(e => e.id === numId);
+    if (!emp) { setLoginError("Employee ID not found. Please check and try again."); return; }
+
+    if (emp.role === "Supervisor") {
+      setRole("supervisor");
+    } else {
+      setRole("employee");
+      setSelectedId(emp.id);
+    }
+    setLoggedInUser({ name: emp.name, role: emp.role, empId: emp.id });
+    setLoggedIn(true);
+
+    // Mandatory read-and-acknowledge gate: block the dashboard until every unread update is acknowledged.
+    const unread = unreadUpdatesFor(emp.id);
+    if (unread.length > 0) {
+      setAckQueue(unread);
+      setShowAckOverlay(true);
+    }
+  }
+
+  // ── Login Screen ──────────────────────────────────────────────────────────
+  if (!loggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background:"linear-gradient(135deg,#0f1b3d 0%,#1e1b4b 40%,#312e81 70%,#4c1d95 100%)"}}>
+        {/* Background orbs */}
+        <div style={{position:"fixed",top:"-10%",right:"-5%",width:"500px",height:"500px",background:"radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 70%)",pointerEvents:"none"}} />
+        <div style={{position:"fixed",bottom:"-10%",left:"-5%",width:"400px",height:"400px",background:"radial-gradient(circle,rgba(59,130,246,0.15) 0%,transparent 70%)",pointerEvents:"none"}} />
+
+        <div className="w-full max-w-sm mx-4" style={{zIndex:1}}>
+          {/* Logo card */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4"
+              style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)",boxShadow:"0 8px 32px rgba(99,102,241,0.4)"}}>
+              <span style={{fontFamily:"Georgia,serif",fontWeight:"900",fontSize:"28px",color:"#fff",letterSpacing:"-1px"}}>AZ</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Random BPO Solutions</h1>
+            <p className="text-sm mt-1" style={{color:"rgba(196,181,253,0.8)"}}>Employee Portal — Secure Login</p>
+          </div>
+
+          {/* Login card */}
+          <div className="rounded-2xl p-8" style={{background:"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 24px 64px rgba(0,0,0,0.4)"}}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-6" style={{color:"rgba(196,181,253,0.7)"}}>Sign in to your account</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{color:"rgba(196,181,253,0.9)"}}>Employee ID</label>
+                <input
+                  value={loginId}
+                  onChange={e => { setLoginId(e.target.value); setLoginError(""); }}
+                  onKeyDown={e => e.key === "Enter" && handleLogin()}
+                  placeholder="e.g. 10005 or HR Manager"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-indigo-300 outline-none transition-all"
+                  style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)"}}
+                  onFocus={e => e.target.style.borderColor="rgba(139,92,246,0.7)"}
+                  onBlur={e => e.target.style.borderColor="rgba(255,255,255,0.15)"}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{color:"rgba(196,181,253,0.9)"}}>Password</label>
+                <input
+                  type="password"
+                  value={loginPass}
+                  onChange={e => { setLoginPass(e.target.value); setLoginError(""); }}
+                  onKeyDown={e => e.key === "Enter" && handleLogin()}
+                  placeholder="Enter your password"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-indigo-300 outline-none transition-all"
+                  style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)"}}
+                  onFocus={e => e.target.style.borderColor="rgba(139,92,246,0.7)"}
+                  onBlur={e => e.target.style.borderColor="rgba(255,255,255,0.15)"}
+                />
+              </div>
+
+              {loginError && (
+                <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm" style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",color:"#fca5a5"}}>
+                  <span>⚠</span> {loginError}
+                </div>
+              )}
+
+              <button
+                onClick={handleLogin}
+                className="w-full py-3 rounded-xl text-sm font-semibold text-white mt-2 transition-all active:scale-95"
+                style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
+                Sign In →
+              </button>
+            </div>
+
+            {/* Access hint */}
+            <div className="mt-6 pt-5 border-t" style={{borderColor:"rgba(255,255,255,0.08)"}}>
+              <p className="text-xs text-center mb-3" style={{color:"rgba(196,181,253,0.5)"}}>Access levels by ID</p>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="rounded-lg py-2 px-1" style={{background:"rgba(255,255,255,0.04)"}}>
+                  <p style={{color:"rgba(167,243,208,0.9)"}} className="font-semibold">TSR / CSR</p>
+                  <p style={{color:"rgba(196,181,253,0.5)"}}>Employee view</p>
+                </div>
+                <div className="rounded-lg py-2 px-1" style={{background:"rgba(255,255,255,0.04)"}}>
+                  <p style={{color:"rgba(253,230,138,0.9)"}} className="font-semibold">Supervisor</p>
+                  <p style={{color:"rgba(196,181,253,0.5)"}}>+ Shift reports</p>
+                </div>
+                <div className="rounded-lg py-2 px-1" style={{background:"rgba(255,255,255,0.04)"}}>
+                  <p style={{color:"rgba(196,181,253,0.9)"}} className="font-semibold">HR Manager</p>
+                  <p style={{color:"rgba(196,181,253,0.5)"}}>Full HR access</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center text-xs mt-6" style={{color:"rgba(196,181,253,0.3)"}}>
+            © 2026 Random BPO Solutions. All rights reserved.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Mandatory update acknowledgement gate ───────────────────────────────────
+  if (showAckOverlay && ackQueue.length > 0) {
+    const current = ackQueue[0];
+    const totalUnread = ackQueue.length;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{background:"linear-gradient(135deg,#0f1b3d 0%,#1e1b4b 40%,#312e81 70%,#4c1d95 100%)"}}>
+        <div className="w-full max-w-lg">
+          <div className="rounded-2xl p-8" style={{background:"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 24px 64px rgba(0,0,0,0.4)"}}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Bell size={18} style={{color:"#c4b5fd"}} />
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{color:"rgba(196,181,253,0.8)"}}>New update — read required</p>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background:"rgba(139,92,246,0.25)",color:"rgba(196,181,253,0.9)"}}>1 of {totalUnread}</span>
+            </div>
+            <p className="text-xs mb-2" style={{color:"rgba(196,181,253,0.6)"}}>{formatUpdateDate(current.date)} · Posted by {current.postedBy || "Supervisor"}</p>
+            <p className="text-white text-base leading-relaxed mb-8">{current.text}</p>
+            <button onClick={handleAcknowledgeCurrent}
+              className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
+              style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
+              I have read and understood — Acknowledge &amp; Continue
+            </button>
+            <p className="text-center text-xs mt-5" style={{color:"rgba(196,181,253,0.4)"}}>
+              You must acknowledge {totalUnread > 1 ? "all pending updates" : "this update"} before your dashboard unlocks.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex text-slate-800">
+      <div className="w-56 flex flex-col shrink-0" style={{background:"linear-gradient(180deg,#0f1b3d 0%,#1e1b4b 100%)"}}>
+        {/* Brand */}
+        <div className="px-5 py-5 border-b" style={{borderColor:"rgba(255,255,255,0.08)"}}>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+              style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+              <span style={{fontFamily:"Georgia,serif",fontWeight:"900",fontSize:"13px",color:"#fff"}}>AZ</span>
+            </div>
+            <div>
+              <p className="font-semibold text-white text-sm leading-tight">Random BPO</p>
+              <p className="text-xs" style={{color:"rgba(196,181,253,0.6)"}}>Employee Portal</p>
+            </div>
+          </div>
+        </div>
+
+        {/* User badge */}
+        <div className="px-4 py-3 mx-3 mt-3 rounded-xl" style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)"}}>
+          <p className="text-xs font-semibold" style={{color:"rgba(196,181,253,0.6)"}}>Signed in as</p>
+          <p className="text-sm font-semibold text-white truncate mt-0.5">{loggedInUser?.name}</p>
+          <span className="inline-block text-xs px-2 py-0.5 rounded-full mt-1 font-medium"
+            style={{background:"rgba(139,92,246,0.25)",color:"rgba(196,181,253,0.9)"}}>
+            {loggedInUser?.role === "hr" ? "HR Manager" : loggedInUser?.role}
+          </span>
+        </div>
+
+        {/* Nav — only show tabs the logged-in role can access */}
+        <div className="flex-1 px-3 py-4 space-y-1">
+          {(loggedInUser?.role === "TSR" || loggedInUser?.role === "CSR" || loggedInUser?.role === "Supervisor") && (
+            <button onClick={() => setRole("employee")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-all ${role === "employee" ? "text-white" : "hover:bg-white/5"}`}
+              style={role === "employee" ? {background:"linear-gradient(135deg,rgba(99,102,241,0.7),rgba(139,92,246,0.7))"} : {color:"rgba(196,181,253,0.7)"}}>
+              <Users size={15} /> Employee View
+            </button>
+          )}
+          {loggedInUser?.role === "Supervisor" && (
+            <button onClick={() => setRole("supervisor")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-all ${role === "supervisor" ? "text-white" : "hover:bg-white/5"}`}
+              style={role === "supervisor" ? {background:"linear-gradient(135deg,rgba(99,102,241,0.7),rgba(139,92,246,0.7))"} : {color:"rgba(196,181,253,0.7)"}}>
+              <Settings size={15} /> Supervisor View
+            </button>
+          )}
+          {(loggedInUser?.role === "TSR" || loggedInUser?.role === "CSR" || loggedInUser?.role === "Supervisor") && (
+            <button onClick={() => setRole("updates")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-all ${role === "updates" ? "text-white" : "hover:bg-white/5"}`}
+              style={role === "updates" ? {background:"linear-gradient(135deg,rgba(99,102,241,0.7),rgba(139,92,246,0.7))"} : {color:"rgba(196,181,253,0.7)"}}>
+              <span className="flex items-center gap-2"><Bell size={15} /> Updates</span>
+              {myUnreadCount > 0 && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-rose-500 text-white">{myUnreadCount}</span>
+              )}
+            </button>
+          )}
+          {loggedInUser?.role === "hr" && (
+            <button onClick={() => setRole("hr")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-all ${role === "hr" ? "text-white" : "hover:bg-white/5"}`}
+              style={role === "hr" ? {background:"linear-gradient(135deg,rgba(99,102,241,0.7),rgba(139,92,246,0.7))"} : {color:"rgba(196,181,253,0.7)"}}>
+              <BriefcaseBusiness size={15} /> HR Manager
+            </button>
+          )}
+        </div>
+
+        {/* Sign out */}
+        <button
+          onClick={() => { setLoggedIn(false); setLoginId(""); setLoginPass(""); setLoggedInUser(null); setRole("employee"); }}
+          className="mx-3 mb-4 px-3 py-2 rounded-lg text-xs flex items-center gap-2 transition-all hover:bg-white/5"
+          style={{color:"rgba(196,181,253,0.45)",border:"1px solid rgba(255,255,255,0.06)"}}>
+          <LogOut size={13} /> Sign out
+        </button>
+      </div>
+
+      <div className="flex-1 p-8 max-w-5xl">
+        {role === "employee" && selected && pay && selAtt && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div><h1 className="text-xl font-semibold">Employee dashboard</h1><p className="text-sm text-slate-500">September 2026 payroll cycle</p></div>
+              <div className="relative">
+                <select value={selectedId} onChange={(e) => setSelectedId(Number(e.target.value))} className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white pr-8 appearance-none">
+                  {employees.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
+                </select>
+                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5">
+              <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="flex items-center gap-2 mb-4"><Wallet size={18} className="text-teal-600" /><h2 className="font-medium">Salary breakdown</h2></div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-slate-500">Basic salary</span><span>{money(selected.basic)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Incentive (of {money(RATES.incentivePool)})</span><span className="text-teal-700">+{money(pay.incentive)}</span></div>
+                  <div className="pl-3 text-xs text-slate-400">Talk time: {selected.tt}s {pay.ttDed ? `(-${money(pay.ttDed)})` : "(no deduction)"}</div>
+                  <div className="pl-3 text-xs text-slate-400">Quality: {selected.quality}% {pay.qDed ? `(-${money(pay.qDed)})` : "(no deduction)"}</div>
+                  {selAtt.exHours > 0 && <div className="flex justify-between"><span className="text-slate-500">Overtime ({hrsLabel(selAtt.exHours)})</span><span className="text-teal-700">+{money(pay.overtimePay)}</span></div>}
+                  {selAtt.extraShifts > 0 && <div className="flex justify-between"><span className="text-slate-500">Extra shifts ({selAtt.extraShifts})</span><span className="text-teal-700">+{money(pay.extraShiftPay)}</span></div>}
+                  {selected.arrears > 0 && <div className="flex justify-between"><span className="text-slate-500">Arrears</span><span className="text-teal-700">+{money(selected.arrears)}</span></div>}
+                  {selected.specialReward > 0 && <div className="flex justify-between"><span className="text-slate-500">Special reward</span><span className="text-teal-700">+{money(selected.specialReward)}</span></div>}
+                  <div className="border-t border-slate-200 my-1 pt-2 flex justify-between"><span className="text-slate-500">Gross</span><span>{money(pay.gross)}</span></div>
+                  {selAtt.callout > 0 && <div className="flex justify-between"><span className="text-slate-500">Call-outs ({selAtt.callout})</span><span className="text-rose-600">-{money(pay.calloutPen)}</span></div>}
+                  {selAtt.ncns > 0 && <div className="flex justify-between"><span className="text-slate-500">NCNS ({selAtt.ncns})</span><span className="text-rose-600">-{money(pay.ncnsPen)}</span></div>}
+                  {selAtt.late > 0 && <div className="flex justify-between"><span className="text-slate-500">Late arrivals ({selAtt.late})</span><span className="text-rose-600">-{money(pay.latePen)}</span></div>}
+                  {selAtt.edHours > 0 && <div className="flex justify-between"><span className="text-slate-500">Early departure ({hrsLabel(selAtt.edHours)})</span><span className="text-rose-600">-{money(pay.edPen)}</span></div>}
+                  {selAtt.ul > 0 && <div className="flex justify-between"><span className="text-slate-500">Unpaid leave ({selAtt.ul})</span><span className="text-rose-600">-{money(pay.ulPen)}</span></div>}
+                  {pay.errorPen > 0 && <div className="flex justify-between"><span className="text-slate-500">Order errors (${errorTotalsByEmp[selected.id] || 0} × Rs{errorRate})</span><span className="text-rose-600">-{money(pay.errorPen)}</span></div>}
+                  {selected.noticePeriod > 0 && <div className="flex justify-between"><span className="text-slate-500">Notice period</span><span className="text-rose-600">-{money(selected.noticePeriod)}</span></div>}
+                  {selected.fine > 0 && <div className="flex justify-between"><span className="text-slate-500">Fine</span><span className="text-rose-600">-{money(selected.fine)}</span></div>}
+                  {selected.loan > 0 && <div className="flex justify-between"><span className="text-slate-500">Loan repayment</span><span className="text-rose-600">-{money(selected.loan)}</span></div>}
+                  {selected.advance > 0 && <div className="flex justify-between"><span className="text-slate-500">Advance recovery</span><span className="text-rose-600">-{money(selected.advance)}</span></div>}
+                  <div className="flex justify-between"><span className="text-slate-500">Tax</span><span className="text-rose-600">-{money(selected.tax)}</span></div>
+                  <div className="border-t border-slate-200 pt-3 flex justify-between font-semibold text-base"><span>Net pay</span><span>{money(pay.net)}</span></div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                <div className="bg-white rounded-xl border border-slate-200">
+                  <div className="p-5 border-b border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays size={18} className="text-teal-600" />
+                      <div>
+                        <h2 className="font-medium">My Weekly Staffing Schedule</h2>
+                        <p className="text-xs text-slate-500">Current weekly shift and day statuses</p>
+                      </div>
+                    </div>
+                  </div>
+                  {(() => {
+                    const mySchedule = weeklySchedule.find((x) => x.empId === selected.id);
+                    if (!mySchedule) {
+                      return <div className="p-5 text-sm text-slate-500">No schedule has been published yet.</div>;
+                    }
+                    return (
+                      <div className="p-5">
+                        <div className="mb-4 flex items-center justify-between">
+                          <div>
+                            <span className="text-xs text-slate-500">Shift</span>
+                            <p className="font-medium">{SHIFT_OPTIONS[mySchedule.shift].label}</p>
+                            <p className="text-xs text-slate-500">{SHIFT_OPTIONS[mySchedule.shift].timing}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-slate-500">Total this week</span>
+                            <p className="font-medium">{hrsLabel(totalWeeklyHours(mySchedule))}</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-2">
+                          {DAYS.map((day, i) => {
+                            const field = day.toLowerCase();
+                            const value = mySchedule[field];
+                            const badge = scheduleBadgeClasses(value);
+                            const custom = mySchedule.customHours && mySchedule.customHours[field];
+                            return (
+                              <div key={day} className={`rounded-lg border p-2 text-center ${badge.wrap}`}>
+                                <p className="text-xs text-slate-500">{day.slice(0, 3)}</p>
+                                <p className="text-[10px] text-slate-400">{weekDayDates(scheduleWeek)[i]}</p>
+                                {value === "Custom" && custom ? (
+                                  <p className={`text-[10px] font-semibold mt-1 leading-tight ${badge.text}`}>{formatTime12(custom.start)}–{formatTime12(custom.end)}</p>
+                                ) : (
+                                  <p className={`text-[11px] font-semibold mt-1 leading-tight ${badge.text}`}>{value}</p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3"><ClipboardList size={18} className="text-teal-600" /><h2 className="font-medium">My attendance this month</h2></div>
+                  <div className="space-y-1 text-sm max-h-44 overflow-y-auto">
+                    {attendanceLog.filter((a) => a.empId === selected.id).length === 0 && <p className="text-slate-400">No events logged.</p>}
+                    {attendanceLog.filter((a) => a.empId === selected.id).sort((a, b) => a.date.localeCompare(b.date)).map((a) => (
+                      <p key={a.id} className="text-slate-600 flex justify-between border-b border-slate-50 pb-1">
+                        <span>{a.date} · {TYPE_LABEL[a.type]}</span>
+                        <span className="text-slate-400">{detailLabel(a)}</span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3"><Gauge size={18} className="text-teal-600" /><h2 className="font-medium">My KPIs</h2></div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <p className="text-xs text-slate-500">Talk Time</p>
+                      <p className="text-lg font-semibold">{selected.tt}s</p>
+                      <p className="text-xs text-slate-400">{pay.ttDed ? `-${money(pay.ttDed)}` : "No deduction"}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <p className="text-xs text-slate-500">Quality (QA)</p>
+                      <p className="text-lg font-semibold">{selected.quality}%</p>
+                      <p className="text-xs text-slate-400">{pay.qDed ? `-${money(pay.qDed)}` : "No deduction"}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-2">Order errors</p>
+                  <div className="space-y-1 text-sm">
+                    {errors.filter((x) => x.empId === selected.id).length === 0 && <p className="text-slate-400">No errors logged.</p>}
+                    {errors.filter((x) => x.empId === selected.id).map((x) => (
+                      <p key={x.id} className="text-slate-600 border-l-2 border-rose-200 pl-3"><span className="text-xs text-slate-400">{x.date}: </span>{x.note} — ${x.usd} ({money(x.usd * errorRate)})</p>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── CPD English Exercise ─────────────────────────────────── */}
+                <div className="bg-white rounded-xl border border-indigo-100 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-indigo-100 flex items-center justify-between" style={{background:"linear-gradient(90deg,#eef2ff,#f5f3ff)"}}>
+                    <div className="flex items-center gap-2">
+                      <BookOpen size={17} className="text-indigo-600"/>
+                      <div>
+                        <p className="font-medium text-indigo-800 text-sm">CPD English Exercise</p>
+                        <p className="text-xs text-indigo-400">B1 Level · Reading Comprehension · ~30 min target</p>
+                      </div>
+                    </div>
+                    {(() => {
+                      const r = myLatestCpd(selected.id);
+                      if (!r) return <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Not completed today</span>;
+                      const pct = Math.round((r.score/r.total)*100);
+                      return <span className={`text-xs px-2 py-1 rounded-full font-medium ${pct>=80?"bg-emerald-100 text-emerald-700":pct>=60?"bg-amber-100 text-amber-700":"bg-rose-100 text-rose-600"}`}>Last score: {pct}%</span>;
+                    })()}
+                  </div>
+
+                  {/* idle */}
+                  {cpdPhase==="idle" && (
+                    <div className="p-5">
+                      {myLatestCpd(selected.id) ? (
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            {(() => { const r=myLatestCpd(selected.id); const pct=Math.round((r.score/r.total)*100); return (
+                              <div>
+                                <div className="flex items-center gap-3 mb-2">
+                                  <Trophy size={18} className={pct>=80?"text-yellow-500":"text-slate-400"}/>
+                                  <span className="font-semibold text-slate-700">{r.score}/{r.total} correct — {pct}%</span>
+                                  <span className="text-xs text-slate-400">· {r.date}</span>
+                                </div>
+                                <div className="w-full bg-slate-100 rounded-full h-2">
+                                  <div className="h-2 rounded-full transition-all" style={{width:`${pct}%`,background:pct>=80?"#10b981":pct>=60?"#f59e0b":"#ef4444"}}/>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-1">{pct>=80?"Excellent work! Well above B1 standard.":pct>=60?"Good effort. Review the areas you missed.":"Keep practising — aim for 80%+ next time."}</p>
+                              </div>
+                            ); })()}
+                          </div>
+                          <button onClick={startCpdExercise} className="text-xs px-3 py-2 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 whitespace-nowrap">Redo exercise</button>
+                        </div>
+                      ) : (
+                        <div className="text-center py-3">
+                          <p className="text-sm text-slate-500 mb-3">Complete today's reading exercise to log your CPD hours.</p>
+                          <button onClick={startCpdExercise} className="px-5 py-2 rounded-lg text-sm font-semibold text-white" style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>Start Exercise →</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* reading phase */}
+                  {cpdPhase==="reading" && (
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">{CPD_EXERCISE.title}</p>
+                        <span className="text-xs text-slate-400">Read carefully — questions follow</span>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-4 mb-4 text-sm text-slate-700 leading-relaxed whitespace-pre-line border border-slate-100" style={{maxHeight:"220px",overflowY:"auto"}}>
+                        {CPD_EXERCISE.passage}
+                      </div>
+                      <button onClick={startCpdQuiz} className="w-full py-2.5 rounded-lg text-sm font-semibold text-white" style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+                        I have read the passage — Start Quiz →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* quiz phase */}
+                  {cpdPhase==="quiz" && (
+                    <div className="p-5 space-y-5">
+                      {CPD_EXERCISE.questions.map((q,qi)=>(
+                        <div key={q.id} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                          <p className="text-sm font-medium text-slate-700 mb-3">{qi+1}. {q.q}</p>
+                          <div className="space-y-2">
+                            {q.options.map((opt,oi)=>(
+                              <label key={oi} className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer border text-sm transition-all ${cpdAnswers[q.id]===oi?"border-indigo-400 bg-indigo-50 text-indigo-700":"border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/50"}`}>
+                                <input type="radio" name={`q${q.id}`} checked={cpdAnswers[q.id]===oi} onChange={()=>setCpdAnswers(a=>({...a,[q.id]:oi}))} className="accent-indigo-600"/>
+                                {opt}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={submitCpdQuiz}
+                        disabled={Object.keys(cpdAnswers).length < CPD_EXERCISE.questions.length}
+                        className="w-full py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-40 transition-all"
+                        style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+                        Submit Answers ({Object.keys(cpdAnswers).length}/{CPD_EXERCISE.questions.length} answered)
+                      </button>
+                    </div>
+                  )}
+
+                  {/* done phase */}
+                  {cpdPhase==="done" && (() => {
+                    const r = myLatestCpd(selected.id);
+                    if (!r) return null;
+                    const pct = Math.round((r.score/r.total)*100);
+                    return (
+                      <div className="p-5 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3" style={{background:pct>=80?"#d1fae5":pct>=60?"#fef3c7":"#fee2e2"}}>
+                          <Trophy size={28} className={pct>=80?"text-emerald-600":pct>=60?"text-amber-500":"text-rose-500"}/>
+                        </div>
+                        <p className="text-2xl font-bold mb-1" style={{color:pct>=80?"#059669":pct>=60?"#d97706":"#dc2626"}}>{pct}%</p>
+                        <p className="text-sm text-slate-600 mb-1">{r.score} out of {r.total} correct</p>
+                        <p className="text-xs text-slate-400 mb-4">{pct>=80?"Outstanding! Your English comprehension is strong.":pct>=60?"Good effort. Keep reading to improve further.":"Don't worry — practice makes perfect. Try again soon."}</p>
+                        {/* Show answers */}
+                        <div className="text-left space-y-2 mb-4">
+                          {CPD_EXERCISE.questions.map((q,qi)=>{
+                            const given = cpdAnswers[q.id];
+                            const correct = given===q.answer;
+                            return (
+                              <div key={q.id} className={`rounded-lg p-3 text-xs border ${correct?"bg-emerald-50 border-emerald-100":"bg-rose-50 border-rose-100"}`}>
+                                <p className={`font-medium mb-1 ${correct?"text-emerald-700":"text-rose-700"}`}>{qi+1}. {correct?"✓":"✗"} {q.q}</p>
+                                {!correct && <p className="text-slate-500">Correct answer: <span className="font-medium text-slate-700">{q.options[q.answer]}</span></p>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-indigo-600 font-medium mb-3">✓ 30 min CPD logged for today</p>
+                        <button onClick={()=>setCpdPhase("idle")} className="text-xs px-4 py-2 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50">Done</button>
+                      </div>
+                    );
+                  })()}
+
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3"><Send size={18} className="text-teal-600" /><h2 className="font-medium">Send a request to HR / Supervisor</h2></div>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <button onClick={() => setReqType("Off")} className={`text-sm px-3 py-2 rounded-lg border ${reqType === "Off" ? "bg-teal-600 text-white border-teal-600" : "border-slate-200 hover:bg-slate-50"}`}>Off change</button>
+                    <button onClick={() => setReqType("Advance")} className={`text-sm px-3 py-2 rounded-lg border ${reqType === "Advance" ? "bg-teal-600 text-white border-teal-600" : "border-slate-200 hover:bg-slate-50"}`}>Salary advance</button>
+                    <button onClick={() => setReqType("Leave")} className={`text-sm px-3 py-2 rounded-lg border ${reqType === "Leave" ? "bg-teal-600 text-white border-teal-600" : "border-slate-200 hover:bg-slate-50"}`}>Leave</button>
+                    <button onClick={() => setReqType("Payslip")} className={`text-sm px-3 py-2 rounded-lg border ${reqType === "Payslip" ? "bg-teal-600 text-white border-teal-600" : "border-slate-200 hover:bg-slate-50"}`}>Payslip</button>
+                  </div>
+                  {reqType && (
+                    <div className="border-t border-slate-100 pt-3 space-y-2 mb-3">
+                      {reqType === "Off" && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <input type="date" value={reqForm.requestedDate} onChange={(e) => setReqForm({ ...reqForm, requestedDate: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                          <select value={reqForm.requestedOff} onChange={(e) => setReqForm({ ...reqForm, requestedOff: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+                            {DAYS.map((d) => (<option key={d} value={d}>New OFF: {d}</option>))}
+                          </select>
+                        </div>
+                      )}
+                      {reqType === "Advance" && (
+                        <input type="number" value={reqForm.amount} onChange={(e) => setReqForm({ ...reqForm, amount: e.target.value })} placeholder="Amount (Rs)" className="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                      )}
+                      {reqType === "Leave" && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <input type="date" value={reqForm.requestedDate} onChange={(e) => setReqForm({ ...reqForm, requestedDate: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                          <select value={reqForm.leaveType} onChange={(e) => setReqForm({ ...reqForm, leaveType: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+                            <option value="Paid">Paid leave</option>
+                            <option value="Unpaid">Unpaid leave</option>
+                          </select>
+                        </div>
+                      )}
+                      <input value={reqForm.reason} onChange={(e) => setReqForm({ ...reqForm, reason: e.target.value })} placeholder={reqType === "Payslip" ? "Which month / where to send it" : "Reason"} className="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                      <div className="flex gap-2">
+                        <button onClick={submitRequest} className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg">Send request</button>
+                        <button onClick={() => setReqType(null)} className="text-sm px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-50">Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1 max-h-28 overflow-y-auto text-sm border-t border-slate-100 pt-2">
+                    {myRequests.length === 0 && <p className="text-slate-400">No requests sent yet.</p>}
+                    {myRequests.map((r) => (
+                      <p key={r.id} className="flex items-center justify-between gap-2">
+                        <span className="text-slate-600">{r.label}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs shrink-0 ${requestStatusPill(r.status)}`}>{r.status}</span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2"><Bell size={18} className="text-teal-600" /><h2 className="font-medium">Company updates</h2></div>
+                    {myUnreadCount > 0 && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-rose-500 text-white">{myUnreadCount} new</span>}
+                  </div>
+                  <div className="space-y-3">
+                    {updatesByDate.slice(0, 1).flatMap(g => g.items).slice(0, 2).map((u) => (
+                      <p key={u.id} className="text-sm text-slate-600 border-l-2 border-teal-200 pl-3">
+                        <span className="text-xs text-slate-400 block">{formatUpdateDate(u.date)}</span>{u.text}
+                      </p>
+                    ))}
+                  </div>
+                  <button onClick={() => setRole("updates")} className="mt-3 text-xs font-medium text-teal-600 hover:text-teal-700">View all updates →</button>
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3"><AlertTriangle size={18} className="text-amber-500" /><h2 className="font-medium">Messages to you</h2></div>
+                  <div className="space-y-3">
+                    {privateMsgs.filter((m) => m.empId === selected.id).length === 0 && (<p className="text-sm text-slate-400">No messages.</p>)}
+                    {privateMsgs.filter((m) => m.empId === selected.id).map((m) => (<p key={m.id} className="text-sm text-slate-600 border-l-2 border-amber-200 pl-3">{m.text}</p>))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {role === "updates" && (
+          <div>
+            <div className="mb-6"><h1 className="text-xl font-semibold">Updates</h1><p className="text-sm text-slate-500">Menu changes, promotions & guidelines — stored date-wise, with a read acknowledgement for every agent.</p></div>
+
+            {loggedInUser?.role === "Supervisor" && (
+              <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+                <div className="flex items-center gap-2 mb-3"><Send size={18} className="text-indigo-600" /><h2 className="font-medium">Post a new update</h2></div>
+                <textarea value={newBroadcast} onChange={(e) => setNewBroadcast(e.target.value)} rows={3}
+                  placeholder="e.g. New spicy chicken pizza added to menu, effective today."
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mb-3" />
+                <button onClick={postBroadcast} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg">Post update</button>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              {updatesByDate.length === 0 && <p className="text-sm text-slate-400">No updates posted yet.</p>}
+              {updatesByDate.map((group) => (
+                <div key={group.date}>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{formatUpdateDate(group.date)}</p>
+                  <div className="space-y-3">
+                    {group.items.map((u) => {
+                      const ackList = acknowledgements.filter((a) => a.updateId === u.id);
+                      const myAck = loggedInUser?.empId ? ackList.find((a) => a.empId === loggedInUser.empId) : null;
+                      const eligibleCount = employees.filter((e) => e.role === "TSR" || e.role === "CSR" || e.role === "Supervisor").length;
+                      return (
+                        <div key={u.id} className="bg-white rounded-xl border border-slate-200 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <p className="text-sm text-slate-700">{u.text}</p>
+                              <p className="text-xs text-slate-400 mt-1">Posted by {u.postedBy || "Supervisor"}</p>
+                            </div>
+                            {loggedInUser?.role === "Supervisor" && (
+                              <button onClick={() => deleteBroadcast(u.id)} title="Delete update" className="text-slate-300 hover:text-rose-500 shrink-0 p-1">
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
+                            {myAck ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-medium"><CheckCircle2 size={14} /> Acknowledged · {myAck.timestamp}</span>
+                            ) : (
+                              <button onClick={() => acknowledgeUpdate(u.id)} className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg font-medium">
+                                Mark as read
+                              </button>
+                            )}
+                            {loggedInUser?.role === "Supervisor" && (
+                              <span className="text-xs text-slate-400">{ackList.length}/{eligibleCount} agents acknowledged</span>
+                            )}
+                          </div>
+
+                          {loggedInUser?.role === "Supervisor" && ackList.length > 0 && (
+                            <details className="mt-2">
+                              <summary className="text-xs text-indigo-500 cursor-pointer select-none">View read receipts</summary>
+                              <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                                {ackList.map((a, i) => (
+                                  <p key={i} className="text-xs text-slate-500 flex justify-between gap-3">
+                                    <span>{employees.find((e) => e.id === a.empId)?.name || a.empId}</span>
+                                    <span className="shrink-0">{a.timestamp}</span>
+                                  </p>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {role === "supervisor" && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div><h1 className="text-xl font-semibold">Supervisor dashboard</h1><p className="text-sm text-slate-500">September 2026 payroll cycle · {employees.length} employees</p></div>
+            </div>
+
+            {/* ── SUPERVISOR TABS ──────────────────────────────────────────── */}
+            <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit flex-wrap">
+              {[["schedule","📅  Schedule"],["performance","📊  Performance & Order Errors"],["attendance","🗓️  Attendance Summary"],["updates","📢  Updates & Messages"]].map(([t,label])=>(
+                <button key={t} onClick={()=>setSupervisorTab(t)}
+                  className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${supervisorTab===t?"bg-white text-teal-700 shadow-sm":"text-slate-500 hover:text-slate-700"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 1 — SCHEDULE
+            ════════════════════════════════════════════════════════════ */}
+            {supervisorTab === "schedule" && (
+              <div>
+                {/* STAFFING SCHEDULE — SUPERVISOR */}
+                <div className="bg-white rounded-xl border border-slate-200 mb-6">
+
+                  <div className="p-5 border-b border-slate-200">
+
+                    <div className="flex items-center gap-2">
+                      <CalendarDays
+                        size={18}
+                        className="text-teal-600"
+                      />
+
+                      <div>
+                        <h2 className="font-medium">
+                          Weekly Staffing Schedule
+                        </h2>
+
+                        <p className="text-xs text-slate-500">
+                          Schedule published by HR Manager
+                        </p>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  <div className="overflow-x-auto">
+
+                    <table className="w-full text-sm">
+
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+
+                        <tr>
+
+                          <th className="text-left px-4 py-3">
+                            Employee
+                          </th>
+
+                          <th className="text-left px-4 py-3">
+                            Shift
+                          </th>
+
+                          {DAYS.map((day, i) => (
+                            <th
+                              key={day}
+                              className="text-center px-2 py-3"
+                            >
+                              <div>{day.slice(0, 3)}</div>
+                              <div className="text-[10px] font-normal normal-case text-slate-400">{weekDayDates(scheduleWeek)[i]}</div>
+                            </th>
+                          ))}
+
+                          <th className="text-center px-3 py-3">Total Hrs</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {weeklySchedule.map((row) => {
+
+                          const employee =
+                            employees.find(
+                              (e) => e.id === row.empId
+                            );
+
+                          return (
+                            <tr
+                              key={row.id}
+                              className="border-t border-slate-100"
+                            >
+
+                              <td className="px-4 py-3 font-medium">
+                                {employee?.name}
+                              </td>
+
+                              <td className="px-3 py-3">
+
+                                <p className="text-xs font-medium">
+                                  {SHIFT_OPTIONS[row.shift].label}
+                                </p>
+
+                                <p className="text-xs text-slate-400">
+                                  {SHIFT_OPTIONS[row.shift].timing}
+                                </p>
+
+                                <p className="text-[10px] text-slate-400">
+                                  {row.shift === "first" ? "Fri/Sat: +1h" : "Fri/Sat: +1h · Sun: -1h"}
+                                </p>
+
+                              </td>
+
+                              {DAYS.map((day) => {
+
+                                const field = day.toLowerCase();
+                                const value =
+                                  row[field];
+                                const custom = row.customHours && row.customHours[field];
+
+                                return (
+                                  <td
+                                    key={day}
+                                    className="text-center px-2 py-3"
+                                  >
+
+                                    <span
+                                      className={`px-2 py-1 rounded text-xs ${scheduleBadgeClasses(value).pill}`}
+                                    >
+                                      {value === "Custom" && custom ? `${formatTime12(custom.start)}–${formatTime12(custom.end)}` : value}
+                                    </span>
+
+                                  </td>
+                                );
+
+                              })}
+
+                              <td className="text-center px-3 py-3 font-semibold text-slate-700">
+                                {hrsLabel(totalWeeklyHours(row))}
+                              </td>
+
+                            </tr>
+                          );
+                        })}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 2 — PERFORMANCE & ORDER ERRORS
+            ════════════════════════════════════════════════════════════ */}
+            {supervisorTab === "performance" && (
+              <div>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Headcount</p><p className="text-xl font-semibold">{totals.headcount}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Total net payroll</p><p className="text-xl font-semibold">{money(totals.payroll)}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Incentives paid</p><p className="text-xl font-semibold text-teal-700">{money(totals.incentives)}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Deductions</p><p className="text-xl font-semibold text-rose-600">{money(totals.deductions)}</p></div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2"><Gauge size={18} className="text-teal-600" /><h2 className="font-medium">Performance (from QA scorecard)</h2></div>
+                    <div className="relative">
+                      <select value={perfEmpId} onChange={(e) => setPerfEmpId(Number(e.target.value))} className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white pr-8 appearance-none">
+                        {employees.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+                    </div>
+                  </div>
+                  {(() => {
+                    const emp = allPay.find((e) => e.id === perfEmpId);
+                    if (!emp) return <p className="text-sm text-slate-400">No employee selected.</p>;
+                    return (
+                      <div>
+                        <p className="text-xs text-slate-400 mb-4">{emp.role} · ID {emp.id}</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <label className="text-xs text-slate-500 block mb-1">Talk Time (s)</label>
+                            <input type="number" value={emp.tt} onChange={(ev) => updateField(emp.id, "tt", ev.target.value)} className="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-slate-500 block mb-1">Quality %</label>
+                            <input type="number" value={emp.quality} onChange={(ev) => updateField(emp.id, "quality", ev.target.value)} className="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500 mb-1">Incentive</p>
+                            <p className="text-sm font-semibold text-teal-700 py-1.5">{money(emp.incentive)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500 mb-1">Net pay</p>
+                            <p className="text-sm font-semibold py-1.5">{money(emp.net)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2"><AlertTriangle size={18} className="text-rose-500" /><h2 className="font-medium">Order errors log (billed in USD by client)</h2></div>
+                    <label className="text-xs text-slate-500 flex items-center gap-2">Rate: Rs<input type="number" value={errorRate} onChange={(e) => setErrorRate(Number(e.target.value) || 0)} className="w-16 border border-slate-200 rounded px-1.5 py-1 text-center" />per $1</label>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2 text-sm mb-3">
+                    <select value={errForm.empId} onChange={(e) => setErrForm({ ...errForm, empId: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5">
+                      {employees.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
+                    </select>
+                    <input type="date" value={errForm.date} onChange={(e) => setErrForm({ ...errForm, date: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5" />
+                    <input value={errForm.note} onChange={(e) => setErrForm({ ...errForm, note: e.target.value })} placeholder="What went wrong" className="border border-slate-300 rounded-lg px-2 py-1.5 col-span-2" />
+                    <input type="number" value={errForm.usd} onChange={(e) => setErrForm({ ...errForm, usd: e.target.value })} placeholder="Amount $" className="border border-slate-300 rounded-lg px-2 py-1.5" />
+                  </div>
+                  <button onClick={addError} className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg mb-3">Log error</button>
+                  <div className="space-y-1">
+                    {errors.slice(0, 4).map((x) => (<p key={x.id} className="text-sm text-slate-600 border-l-2 border-rose-200 pl-3"><span className="text-xs text-slate-400">{employees.find((e) => e.id === x.empId)?.name} · {x.date}: </span>{x.note} — ${x.usd} ({money(x.usd * errorRate)})</p>))}
+                  </div>
+
+                  {/* ── CPD Results dropdown ────────────────────────────── */}
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <button onClick={()=>setShowCpdExpand(v=>!v)}
+                      className="flex items-center justify-between w-full text-sm font-medium text-indigo-700 hover:text-indigo-900 transition-colors">
+                      <div className="flex items-center gap-2"><BookOpen size={15}/> Team CPD English Exercise Results</div>
+                      <ChevronDown size={14} className={`transition-transform ${showCpdExpand?"rotate-180":""}`}/>
+                    </button>
+                    {showCpdExpand && (
+                      <div className="mt-3 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-indigo-50 text-xs text-indigo-600 uppercase">
+                            <tr>
+                              <th className="text-left px-3 py-2">Employee</th>
+                              <th className="text-center px-3 py-2">Date</th>
+                              <th className="text-center px-3 py-2">Score</th>
+                              <th className="text-center px-3 py-2">%</th>
+                              <th className="text-center px-3 py-2">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {employees.map(emp => {
+                              const r = cpdResults.find(x => x.empId === emp.id);
+                              const pct = r ? Math.round((r.score/r.total)*100) : null;
+                              return (
+                                <tr key={emp.id} className="border-t border-slate-100">
+                                  <td className="px-3 py-2 font-medium">{emp.name}<span className="text-xs text-slate-400 ml-1">{emp.id}</span></td>
+                                  <td className="px-3 py-2 text-center text-slate-500 text-xs">{r ? r.date : "—"}</td>
+                                  <td className="px-3 py-2 text-center">{r ? `${r.score}/${r.total}` : "—"}</td>
+                                  <td className="px-3 py-2 text-center font-semibold" style={{color:pct===null?"#94a3b8":pct>=80?"#059669":pct>=60?"#d97706":"#dc2626"}}>{pct!==null?`${pct}%`:"—"}</td>
+                                  <td className="px-3 py-2 text-center">
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${r?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>
+                                      {r ? (pct>=80?"Excellent":pct>=60?"Good":"Needs work") : "Pending"}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        {cpdResults.length===0 && <p className="text-xs text-slate-400 text-center py-3">No agents have completed the exercise yet.</p>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 text-xs text-slate-400">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  <p>Loan, advance, tax, arrears and notice period are not editable here. Fine and Special Reward are now entered by HR under Generate Payroll. These still affect net pay from stored values.</p>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 3 — ATTENDANCE SUMMARY
+            ════════════════════════════════════════════════════════════ */}
+            {supervisorTab === "attendance" && (
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-2">Attendance summary (auto-tallied from daily log below)</p>
+                <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto mb-6">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase"><tr><th className="text-left px-4 py-2">Employee</th><th className="text-center px-1 py-2">Late</th><th className="text-center px-1 py-2">Callout</th><th className="text-center px-1 py-2">NCNS</th><th className="text-center px-1 py-2">U/L</th><th className="text-center px-1 py-2">ED hrs</th><th className="text-center px-1 py-2">EX hrs</th><th className="text-center px-1 py-2">X-shift</th></tr></thead>
+                    <tbody>
+                      {allPay.map((e) => (
+                        <tr key={e.id} className="border-t border-slate-100">
+                          <td className="px-4 py-2 font-medium">{e.name}</td>
+                          <td className="px-1 py-2 text-center">{e.att.late}</td>
+                          <td className="px-1 py-2 text-center">{e.att.callout}</td>
+                          <td className="px-1 py-2 text-center">{e.att.ncns}</td>
+                          <td className="px-1 py-2 text-center">{e.att.ul}</td>
+                          <td className="px-1 py-2 text-center">{e.att.edHours || "—"}</td>
+                          <td className="px-1 py-2 text-center">{e.att.exHours || "—"}</td>
+                          <td className="px-1 py-2 text-center">{e.att.extraShifts}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* ── SHIFT REPORT ───────────────────────────────────────────── */}
+                <div className="bg-white rounded-xl border border-slate-200 mb-6 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-5 py-4 border-b border-slate-200" style={{background: "linear-gradient(90deg,#1e3a5f 0%,#2563a8 100%)"}}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FilePlus size={20} className="text-yellow-300" />
+                        <div>
+                          <p className="font-bold text-yellow-300 text-sm tracking-wide uppercase">A Shift Report</p>
+                          <p className="text-xs text-blue-200">Entries auto-sync to employee records & payroll</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input type="date" value={shiftReportDate} onChange={e => setShiftReportDate(e.target.value)}
+                          className="border border-blue-400 bg-blue-900 text-white rounded px-2 py-1 text-xs" />
+                        <select value={compiledBy} onChange={e => setCompiledBy(e.target.value)}
+                          className="border border-blue-400 bg-blue-900 text-white rounded px-2 py-1 text-xs">
+                          {employees.filter(e => e.role === "Supervisor").map(e => (
+                            <option key={e.id} value={e.name}>{e.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-blue-50 border-b border-blue-100">
+                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-blue-900 uppercase w-36">Subject</th>
+                          <th className="text-left px-3 py-2.5 text-xs font-semibold text-blue-900 uppercase w-44">Employee</th>
+                          <th className="text-left px-3 py-2.5 text-xs font-semibold text-blue-900 uppercase w-32">Arrival Time</th>
+                          <th className="text-left px-3 py-2.5 text-xs font-semibold text-blue-900 uppercase">Details / Notes</th>
+                          <th className="px-2 py-2.5 w-8"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reportRows.map((row, idx) => {
+                          const needsTime = row.subject === "Late Arrival";
+                          const needsDetail = ["Early Departure","Extra Hours","Extra Shift"].includes(row.subject);
+                          return (
+                            <tr key={row.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}`}>
+                              <td className="px-3 py-2">
+                                <select value={row.subject}
+                                  onChange={e => updateReportRow(row.id, "subject", e.target.value)}
+                                  className="w-full border border-slate-200 rounded px-1.5 py-1 text-xs bg-white">
+                                  {REPORT_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                                </select>
+                              </td>
+                              <td className="px-3 py-2">
+                                <select value={row.empId}
+                                  onChange={e => updateReportRow(row.id, "empId", e.target.value)}
+                                  className="w-full border border-slate-200 rounded px-1.5 py-1 text-xs bg-white">
+                                  <option value="">— select —</option>
+                                  {employees.map(e => (
+                                    <option key={e.id} value={e.id}>{e.id} · {e.name}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-3 py-2">
+                                {needsTime
+                                  ? <input type="time" value={row.arrivalTime}
+                                      onChange={e => updateReportRow(row.id, "arrivalTime", e.target.value)}
+                                      className="w-full border border-slate-200 rounded px-1.5 py-1 text-xs" />
+                                  : <span className="text-xs text-slate-300 px-1">—</span>
+                                }
+                              </td>
+                              <td className="px-3 py-2">
+                                <input value={row.details}
+                                  onChange={e => updateReportRow(row.id, "details", e.target.value)}
+                                  placeholder={needsDetail ? "Hours e.g. 1.5" : "Optional note"}
+                                  className="w-full border border-slate-200 rounded px-1.5 py-1 text-xs" />
+                              </td>
+                              <td className="px-2 py-2 text-center">
+                                <button onClick={() => removeReportRow(row.id)}
+                                  className="text-slate-300 hover:text-rose-500 transition-colors">
+                                  <Trash2 size={13} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <button onClick={addReportRow}
+                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
+                        <Plus size={13} /> Add row
+                      </button>
+                      <span className="text-xs text-slate-400">Compiled by: <span className="font-medium text-slate-600">{compiledBy}</span></span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {reportSubmitted && (
+                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                          <CheckCircle2 size={13} /> Report submitted — records updated
+                        </span>
+                      )}
+                      <button onClick={submitShiftReport}
+                        className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-5 py-2 rounded-lg font-medium">
+                        Submit Report
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 4 — UPDATES & MESSAGES
+            ════════════════════════════════════════════════════════════ */}
+            {supervisorTab === "updates" && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2"><Bell size={18} className="text-teal-600" /><h2 className="font-medium">Company-wide updates</h2></div>
+                  </div>
+                  <p className="text-xs text-slate-500 mb-3">Posting, deleting and read-receipts have moved to the Updates tab, where every agent must acknowledge new updates before their dashboard unlocks.</p>
+                  <div className="space-y-2 mb-4">
+                    {updatesByDate.slice(0, 1).flatMap(g => g.items).slice(0, 2).map((u) => (
+                      <p key={u.id} className="text-sm text-slate-600 border-l-2 border-slate-200 pl-3">
+                        <span className="text-xs text-slate-400 block">{formatUpdateDate(u.date)}</span>{u.text}
+                      </p>
+                    ))}
+                  </div>
+                  <button onClick={() => setRole("updates")} className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg">Go to Updates tab</button>
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3"><AlertTriangle size={18} className="text-amber-500" /><h2 className="font-medium">Send private message / notice</h2></div>
+                  <div className="flex flex-col gap-2 mb-4">
+                    <select value={privateTarget} onChange={(e) => setPrivateTarget(Number(e.target.value))} className="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                      {employees.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
+                    </select>
+                    <div className="flex gap-2">
+                      <input value={privateText} onChange={(e) => setPrivateText(e.target.value)} placeholder="e.g. Note on repeated late arrivals" className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+                      <button onClick={postPrivate} className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg">Send</button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">{privateMsgs.slice(0, 4).map((m) => (<p key={m.id} className="text-sm text-slate-600 border-l-2 border-amber-200 pl-3"><span className="text-xs text-slate-400">{employees.find((e) => e.id === m.empId)?.name}: </span>{m.text}</p>))}</div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {role === "finance" && (
+          <>
+            <div className="mb-6"><h1 className="text-xl font-semibold">Finance — Senior Account Manager</h1><p className="text-sm text-slate-500">Company expenses, vendor payments, bills</p></div>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Entries this month</p><p className="text-xl font-semibold">{expenses.length}</p></div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Total spend</p><p className="text-xl font-semibold text-rose-600">{money(totalExpenses)}</p></div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Payroll (from Supervisor view)</p><p className="text-xl font-semibold">{money(totals.payroll)}</p></div>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+              <div className="flex items-center gap-2 mb-4"><Plus size={18} className="text-teal-600" /><h2 className="font-medium">Log an expense</h2></div>
+              <div className="grid grid-cols-5 gap-2 text-sm">
+                <input type="date" value={expForm.date} onChange={(e) => setExpForm({ ...expForm, date: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5" />
+                <select value={expForm.category} onChange={(e) => setExpForm({ ...expForm, category: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5"><option>Rent</option><option>Utilities</option><option>Vendor payment</option><option>Equipment</option><option>Other</option></select>
+                <input value={expForm.note} onChange={(e) => setExpForm({ ...expForm, note: e.target.value })} placeholder="Note" className="border border-slate-300 rounded-lg px-2 py-1.5 col-span-2" />
+                <input type="number" value={expForm.amount} onChange={(e) => setExpForm({ ...expForm, amount: e.target.value })} placeholder="Amount" className="border border-slate-300 rounded-lg px-2 py-1.5" />
+              </div>
+              <button onClick={addExpense} className="mt-3 bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg">Add entry</button>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-slate-500 text-xs uppercase"><tr><th className="text-left px-4 py-2">Date</th><th className="text-left px-2 py-2">Category</th><th className="text-left px-2 py-2">Note</th><th className="text-right px-4 py-2">Amount</th></tr></thead>
+                <tbody>{expenses.map((x) => (<tr key={x.id} className="border-t border-slate-100"><td className="px-4 py-2">{x.date}</td><td className="px-2 py-2">{x.category}</td><td className="px-2 py-2 text-slate-500">{x.note}</td><td className="px-4 py-2 text-right">{money(x.amount)}</td></tr>))}</tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {role === "hr" && (
+          <>
+            {/* ── HR HEADER ─────────────────────────────────────────────── */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-indigo-100 text-indigo-700 p-2 rounded-lg"><BriefcaseBusiness size={22} /></div>
+                <div>
+                  <h1 className="text-xl font-semibold">HR Manager Dashboard</h1>
+                  <p className="text-sm text-slate-500">Staffing · Requests · Employee Records</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── SUMMARY CARDS ─────────────────────────────────────────── */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Total Employees</p><p className="text-2xl font-semibold">{employees.length}</p></div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Pending Requests</p><p className="text-2xl font-semibold text-amber-600">{scheduleRequests.filter(x=>x.status==="Pending").length + salaryAdvances.filter(x=>x.status==="Pending").length + miscRequests.filter(x=>x.status==="Pending").length}</p></div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Pending HR Tasks</p><p className="text-2xl font-semibold text-rose-600">{hrTasks.filter(x=>x.status==="Pending").length}</p></div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Active Campaigns</p><p className="text-2xl font-semibold text-indigo-600">2</p></div>
+            </div>
+
+            {/* ── TABS ──────────────────────────────────────────────────── */}
+            <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+              {[["schedule","📅  Schedule"],["requests","📋  Requests & Tasks"],["employees","👤  Employee Details"],["payroll","💰  Generate Payroll"]].map(([t,label])=>(
+                <button key={t} onClick={()=>setHrTab(t)}
+                  className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${hrTab===t?"bg-white text-indigo-700 shadow-sm":"text-slate-500 hover:text-slate-700"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 1 — SCHEDULE
+            ════════════════════════════════════════════════════════════ */}
+            {hrTab === "schedule" && (
+              <div>
+                <div className="bg-white rounded-xl border border-slate-200 mb-6">
+                  <div className="p-5 border-b border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CalendarDays size={19} className="text-indigo-600" />
+                        <div>
+                          <h2 className="font-medium">Weekly Staffing Schedule</h2>
+                          <p className="text-xs text-slate-500">Two shifts · edit day status, shift assignments and custom hours</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="date" value={scheduleWeek} onChange={e=>setScheduleWeek(e.target.value)}
+                          className="border border-slate-300 rounded-lg px-3 py-1.5 text-sm"/>
+                        {/* Download CSV */}
+                        <button onClick={()=>{
+                          const header = "Employee ID,Name,Shift,Mon,Tue,Wed,Thu,Fri,Sat,Sun,Total Hrs\n";
+                          const rows = weeklySchedule.map(row=>{
+                            const emp = employees.find(e=>e.id===row.empId);
+                            return [row.empId,emp?.name,SHIFT_OPTIONS[row.shift].label,row.monday,row.tuesday,row.wednesday,row.thursday,row.friday,row.saturday,row.sunday,hrsLabel(totalWeeklyHours(row))].join(",");
+                          }).join("\n");
+                          const blob = new Blob([header+rows],{type:"text/csv"});
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a"); a.href=url; a.download=`schedule_${scheduleWeek}.csv`; a.click();
+                        }}
+                          className="flex items-center gap-1.5 border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 text-xs px-3 py-1.5 rounded-lg transition-all">
+                          <Download size={13}/> CSV
+                        </button>
+                        {/* Roll Out / Print PDF */}
+                        <button onClick={()=>{
+                          const win = window.open("","_blank");
+                          const dates = weekDayDates(scheduleWeek);
+                          const rows = weeklySchedule.map(row=>{
+                            const emp = employees.find(e=>e.id===row.empId);
+                            const cells = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map(d=>{
+                              const v=row[d];
+                              const color = v==="OFF"?"#fef3c7":v==="Extra Shift"?"#d1fae5":v==="Unpaid Leave"?"#fee2e2":v==="Paid Leave"?"#e0f2fe":v==="Custom"?"#e0e7ff":"#f8fafc";
+                              const label = v==="Custom" && row.customHours && row.customHours[d] ? `${formatTime12(row.customHours[d].start)}–${formatTime12(row.customHours[d].end)}` : v;
+                              return `<td style="text-align:center;padding:6px 4px;background:${color};font-size:11px">${label}</td>`;
+                            }).join("");
+                            return `<tr><td style="padding:6px 8px;font-size:12px;white-space:nowrap"><b>${emp?.name}</b><br/><span style="color:#6b7280;font-size:10px">${emp?.id}</span></td><td style="padding:6px 8px;font-size:11px">${SHIFT_OPTIONS[row.shift].label}</td>${cells}<td style="padding:6px 8px;font-size:11px;text-align:center">${hrsLabel(totalWeeklyHours(row))}</td></tr>`;
+                          }).join("");
+                          const dateHeaders = dates.map(d=>`<br/><span style="font-weight:normal;font-size:9px">${d}</span>`);
+                          win.document.write(`<!doctype html><html><head><title>Schedule – ${scheduleWeek}</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #e2e8f0}th{background:#1e1b4b;color:#fff;padding:8px;font-size:11px}</style></head><body><h2 style="color:#1e1b4b">Random BPO — Weekly Schedule (w/e ${scheduleWeek})</h2><table><tr><th>Employee</th><th>Shift</th><th>Mon${dateHeaders[0]}</th><th>Tue${dateHeaders[1]}</th><th>Wed${dateHeaders[2]}</th><th>Thu${dateHeaders[3]}</th><th>Fri${dateHeaders[4]}</th><th>Sat${dateHeaders[5]}</th><th>Sun${dateHeaders[6]}</th><th>Total Hrs</th></tr>${rows}</table></body></html>`);
+                          win.document.close(); win.print();
+                        }}
+                          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-all">
+                          <FilePlus size={13}/> Roll Out Schedule
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div className="bg-slate-50 rounded-lg p-3"><p className="text-xs text-slate-500">First Shift</p><p className="font-medium text-sm">10:00 PM – 7:00 AM</p><p className="text-[11px] text-slate-400 mt-0.5">Fri/Sat: until 8:00 AM (+1h)</p></div>
+                      <div className="bg-slate-50 rounded-lg p-3"><p className="text-xs text-slate-500">Second Shift</p><p className="font-medium text-sm">2:45 AM – 12:00 PM</p><p className="text-[11px] text-slate-400 mt-0.5">Fri/Sat: until 1:00 PM (+1h) · Sun: until 11:00 AM (-1h)</p></div>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+                        <tr>
+                          <th className="text-left px-4 py-3">Employee</th>
+                          <th className="text-left px-3 py-3">Shift</th>
+                          {DAYS.map((day, i)=>(
+                            <th key={day} className="text-center px-2 py-3">
+                              <div>{day.slice(0,3)}</div>
+                              <div className="text-[10px] font-normal normal-case text-slate-400">{weekDayDates(scheduleWeek)[i]}</div>
+                            </th>
+                          ))}
+                          <th className="text-center px-3 py-3">Total Hrs</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {weeklySchedule.map(row=>{
+                          const emp = employees.find(e=>e.id===row.empId);
+                          const totalHrs = totalWeeklyHours(row);
+                          return (
+                            <tr key={row.id} className="border-t border-slate-100">
+                              <td className="px-4 py-3">
+                                <p className="font-medium">{emp?.name}</p>
+                                <p className="text-xs text-slate-400">{emp?.id} · {emp?.role}</p>
+                              </td>
+                              <td className="px-3 py-3">
+                                <select value={row.shift} onChange={e=>updateScheduleShift(row.id,e.target.value)}
+                                  className="border border-slate-300 rounded px-2 py-1 text-xs">
+                                  <option value="first">First</option>
+                                  <option value="second">Second</option>
+                                </select>
+                              </td>
+                              {DAYS.map(day=>{
+                                const field=day.toLowerCase();
+                                const isCustom = row[field] === "Custom";
+                                const custom = (row.customHours && row.customHours[field]) || { start: "", end: "" };
+                                return (
+                                  <td key={day} className="px-2 py-3 text-center">
+                                    <select value={row[field]} onChange={e=>updateScheduleCell(row.id,field,e.target.value)}
+                                      className={`border rounded px-1.5 py-1 text-xs w-full ${scheduleBadgeClasses(row[field]).wrap} ${scheduleBadgeClasses(row[field]).text}`}>
+                                      <option value="Work">Work</option>
+                                      <option value="OFF">Off</option>
+                                      <option value="Unpaid Leave">Unpaid Leave</option>
+                                      <option value="Paid Leave">Paid Leave</option>
+                                      <option value="Extra Shift">Extra Shift</option>
+                                      <option value="Custom">Custom</option>
+                                    </select>
+                                    {isCustom && (
+                                      <div className="flex flex-col gap-1 mt-1">
+                                        <input type="time" value={custom.start} onChange={e=>updateCustomHours(row.id,field,"start",e.target.value)}
+                                          className="border border-indigo-200 rounded px-1 py-0.5 text-[10px] w-full" />
+                                        <input type="time" value={custom.end} onChange={e=>updateCustomHours(row.id,field,"end",e.target.value)}
+                                          className="border border-indigo-200 rounded px-1 py-0.5 text-[10px] w-full" />
+                                      </div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                              <td className="text-center px-3">
+                                <span className="font-semibold text-slate-700">{hrsLabel(totalHrs)}</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="p-4 border-t border-slate-100 text-xs text-slate-400">
+                    Changes here are reflected immediately in Employee and Supervisor views.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 2 — REQUESTS & TASKS
+            ════════════════════════════════════════════════════════════ */}
+            {hrTab === "requests" && (
+              <div className="space-y-6">
+
+                {/* Schedule change requests */}
+                <div className="bg-white rounded-xl border border-slate-200">
+                  <div className="p-5 border-b border-slate-200 flex items-center gap-2">
+                    <Clock size={17} className="text-indigo-600"/>
+                    <div><h2 className="font-medium">Schedule Change Requests</h2><p className="text-xs text-slate-500">Employees requesting OFF day swaps</p></div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+                        <tr><th className="text-left px-4 py-3">Employee</th><th className="text-left px-4 py-3">Current OFF</th><th className="text-left px-4 py-3">Requested OFF</th><th className="text-left px-4 py-3">Reason</th><th className="text-center px-4 py-3">Status</th><th className="text-right px-4 py-3">Action</th></tr>
+                      </thead>
+                      <tbody>
+                        {scheduleRequests.map(req=>{
+                          const emp=employees.find(e=>e.id===req.empId);
+                          return (
+                            <tr key={req.id} className="border-t border-slate-100">
+                              <td className="px-4 py-3 font-medium">{emp?.name}<p className="text-xs text-slate-400">{emp?.id}</p></td>
+                              <td className="px-4 py-3">{req.currentOff}</td>
+                              <td className="px-4 py-3">{req.requestedOff}</td>
+                              <td className="px-4 py-3 text-slate-500">{req.reason}</td>
+                              <td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${requestStatusPill(req.status)}`}>{req.status}</span></td>
+                              <td className="px-4 py-3">
+                                {req.status==="Pending" && (
+                                  <div className="flex justify-end gap-2">
+                                    <button onClick={()=>approveScheduleRequest(req.id)} className="flex items-center gap-1 bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs"><CheckCircle2 size={12}/>Approve</button>
+                                    <button onClick={()=>rejectScheduleRequest(req.id)} className="flex items-center gap-1 bg-rose-600 text-white px-2.5 py-1.5 rounded-lg text-xs"><XCircle size={12}/>Reject</button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Salary advances */}
+                <div className="bg-white rounded-xl border border-slate-200">
+                  <div className="p-5 border-b border-slate-200 flex items-center gap-2">
+                    <Wallet size={17} className="text-indigo-600"/>
+                    <div><h2 className="font-medium">Salary Advance Requests</h2><p className="text-xs text-slate-500">Pending financial requests from employees</p></div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+                        <tr><th className="text-left px-4 py-3">Employee</th><th className="text-left px-4 py-3">Date</th><th className="text-right px-4 py-3">Amount</th><th className="text-left px-4 py-3">Reason</th><th className="text-center px-4 py-3">Status</th><th className="text-right px-4 py-3">Action</th></tr>
+                      </thead>
+                      <tbody>
+                        {salaryAdvances.map(req=>{
+                          const emp=employees.find(e=>e.id===req.empId);
+                          return (
+                            <tr key={req.id} className="border-t border-slate-100">
+                              <td className="px-4 py-3 font-medium">{emp?.name}<p className="text-xs text-slate-400">{emp?.id}</p></td>
+                              <td className="px-4 py-3">{req.date}</td>
+                              <td className="px-4 py-3 text-right font-medium">{money(req.amount)}</td>
+                              <td className="px-4 py-3 text-slate-500">{req.reason}</td>
+                              <td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${requestStatusPill(req.status)}`}>{req.status}</span></td>
+                              <td className="px-4 py-3">
+                                {req.status==="Pending" && (
+                                  <div className="flex justify-end gap-2">
+                                    <button onClick={()=>approveSalaryAdvance(req.id)} className="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs">Approve</button>
+                                    <button onClick={()=>rejectSalaryAdvance(req.id)} className="bg-rose-600 text-white px-2.5 py-1.5 rounded-lg text-xs">Reject</button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Leave / Payslip misc requests */}
+                <div className="bg-white rounded-xl border border-slate-200">
+                  <div className="p-5 border-b border-slate-200 flex items-center gap-2">
+                    <FileText size={17} className="text-indigo-600"/>
+                    <div><h2 className="font-medium">Leave & Payslip Requests</h2><p className="text-xs text-slate-500">Other employee requests</p></div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+                        <tr><th className="text-left px-4 py-3">Employee</th><th className="text-left px-4 py-3">Type</th><th className="text-left px-4 py-3">Date</th><th className="text-left px-4 py-3">Details</th><th className="text-center px-4 py-3">Status</th></tr>
+                      </thead>
+                      <tbody>
+                        {miscRequests.map(req=>{
+                          const emp=employees.find(e=>e.id===req.empId);
+                          return (
+                            <tr key={req.id} className="border-t border-slate-100">
+                              <td className="px-4 py-3 font-medium">{emp?.name}<p className="text-xs text-slate-400">{emp?.id}</p></td>
+                              <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-700">{req.type}</span></td>
+                              <td className="px-4 py-3">{req.date}</td>
+                              <td className="px-4 py-3 text-slate-500">{req.details}</td>
+                              <td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${requestStatusPill(req.status)}`}>{req.status}</span></td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* HR To-Do Tasks */}
+                <div className="bg-white rounded-xl border border-slate-200">
+                  <div className="p-5 border-b border-slate-200 flex items-center gap-2">
+                    <ClipboardList size={17} className="text-indigo-600"/>
+                    <div><h2 className="font-medium">HR To-Do List</h2><p className="text-xs text-slate-500">Pending documents and interviews</p></div>
+                  </div>
+                  {/* Add task */}
+                  <div className="p-5 bg-slate-50 border-b border-slate-200">
+                    <div className="grid grid-cols-4 gap-2">
+                      <select value={newTaskForm.empId} onChange={e=>setNewTaskForm({...newTaskForm,empId:Number(e.target.value)})}
+                        className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+                        {employees.map(emp=><option key={emp.id} value={emp.id}>{emp.name}</option>)}
+                      </select>
+                      <select value={newTaskForm.task} onChange={e=>setNewTaskForm({...newTaskForm,task:e.target.value})}
+                        className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+                        <option>Issuance of Account Opening Letter</option>
+                        <option>Provisional Training Offer Letter</option>
+                        <option>Warning Letter</option>
+                        <option>Final Settlement Letter</option>
+                        <option>Initial Interview</option>
+                        <option>Final Interview</option>
+                        <option>Other HR Task</option>
+                      </select>
+                      <input type="date" value={newTaskForm.dueDate} onChange={e=>setNewTaskForm({...newTaskForm,dueDate:e.target.value})}
+                        className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"/>
+                      <button onClick={addHRTask} className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2">
+                        <Plus size={15}/> Add Task
+                      </button>
+                    </div>
+                    <input value={newTaskForm.notes} onChange={e=>setNewTaskForm({...newTaskForm,notes:e.target.value})}
+                      placeholder="Notes / details" className="w-full mt-2 border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"/>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+                        <tr><th className="text-left px-4 py-3">Employee</th><th className="text-left px-4 py-3">Task</th><th className="text-left px-4 py-3">Due Date</th><th className="text-left px-4 py-3">Notes</th><th className="text-center px-4 py-3">Status</th><th className="text-right px-4 py-3">Action</th></tr>
+                      </thead>
+                      <tbody>
+                        {hrTasks.map(task=>{
+                          const emp=employees.find(e=>e.id===task.empId);
+                          return (
+                            <tr key={task.id} className="border-t border-slate-100">
+                              <td className="px-4 py-3 font-medium">{emp?.name}<p className="text-xs text-slate-400">{emp?.id}</p></td>
+                              <td className="px-4 py-3">{task.task}</td>
+                              <td className="px-4 py-3">{task.dueDate}</td>
+                              <td className="px-4 py-3 text-slate-500">{task.notes}</td>
+                              <td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${task.status==="Completed"?"bg-emerald-100 text-emerald-700":"bg-amber-100 text-amber-700"}`}>{task.status}</span></td>
+                              <td className="px-4 py-3 text-right">
+                                <button onClick={()=>toggleHRTask(task.id)} className={`px-3 py-1.5 rounded-lg text-xs ${task.status==="Completed"?"bg-slate-200 text-slate-700":"bg-teal-600 text-white"}`}>
+                                  {task.status==="Completed"?"Mark Pending":"Mark Completed"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 3 — EMPLOYEE DETAILS
+            ════════════════════════════════════════════════════════════ */}
+            {hrTab === "employees" && (
+              <div>
+                {/* Add Employee toggle */}
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-slate-500">{employees.length} employees on record</p>
+                  <button onClick={()=>setShowAddEmp(!showAddEmp)}
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg transition-all">
+                    <Plus size={15}/> {showAddEmp ? "Cancel" : "Add New Employee"}
+                  </button>
+                </div>
+
+                {/* Add Employee form */}
+                {showAddEmp && (
+                  <div className="bg-white rounded-xl border border-indigo-200 p-5 mb-5">
+                    <h3 className="font-semibold text-indigo-700 mb-4 flex items-center gap-2"><UserPlus size={16}/>New Employee</h3>
+                    <div className="grid grid-cols-3 gap-3 mb-3">
+                      <div><label className="text-xs text-slate-500 block mb-1">Full Name *</label><input value={newEmpForm.name} onChange={e=>setNewEmpForm({...newEmpForm,name:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. Ahmed Ali"/></div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Employee ID *</label><input value={newEmpForm.id} onChange={e=>setNewEmpForm({...newEmpForm,id:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. 10260"/></div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Role</label>
+                        <select value={newEmpForm.role} onChange={e=>setNewEmpForm({...newEmpForm,role:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                          <option>CSR</option><option>TSR</option><option>Supervisor</option>
+                        </select>
+                      </div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Contact Number</label><input value={newEmpForm.phone} onChange={e=>setNewEmpForm({...newEmpForm,phone:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="03xx-xxxxxxx"/></div>
+                      <div><label className="text-xs text-slate-500 block mb-1">CNIC</label><input value={newEmpForm.cnic} onChange={e=>setNewEmpForm({...newEmpForm,cnic:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="xxxxx-xxxxxxx-x"/></div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Emergency Contact</label><input value={newEmpForm.emergencyContact} onChange={e=>setNewEmpForm({...newEmpForm,emergencyContact:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="03xx-xxxxxxx"/></div>
+                      <div className="col-span-2"><label className="text-xs text-slate-500 block mb-1">Address</label><input value={newEmpForm.address} onChange={e=>setNewEmpForm({...newEmpForm,address:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="House #, Street, Area, City"/></div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Campaign</label>
+                        <select value={newEmpForm.campaign} onChange={e=>setNewEmpForm({...newEmpForm,campaign:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                          <option>A</option><option>B</option>
+                        </select>
+                      </div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Employment Status</label>
+                        <select value={newEmpForm.status} onChange={e=>setNewEmpForm({...newEmpForm,status:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                          <option>Contract</option><option>Probation</option><option>Notice Period</option>
+                        </select>
+                      </div>
+                      <div><label className="text-xs text-slate-500 block mb-1">Basic Salary (Rs)</label><input type="number" value={newEmpForm.basic} onChange={e=>setNewEmpForm({...newEmpForm,basic:e.target.value})} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"/></div>
+                    </div>
+                    <button onClick={addNewEmployee} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2 rounded-lg">
+                      Save Employee
+                    </button>
+                  </div>
+                )}
+
+                {/* Employee Details Table */}
+                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-xs text-slate-500 uppercase border-b border-slate-200">
+                        <tr>
+                          <th className="text-left px-4 py-3">Employee</th>
+                          <th className="text-left px-4 py-3">Campaign</th>
+                          <th className="text-left px-4 py-3">Status</th>
+                          <th className="text-left px-4 py-3">Contact</th>
+                          <th className="text-left px-4 py-3">Emergency</th>
+                          <th className="text-left px-4 py-3">CNIC</th>
+                          <th className="text-left px-4 py-3">Address</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {employees.map(emp=>{
+                          const det = empDetails.find(d=>d.id===emp.id) || {};
+                          return (
+                            <tr key={emp.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
+                              <td className="px-4 py-3">
+                                <p className="font-medium">{emp.name}</p>
+                                <p className="text-xs text-slate-400">{emp.id} · {emp.role}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <select value={det.campaign||"A"} onChange={e=>saveEmpDetail(emp.id,"campaign",e.target.value)}
+                                  className="border border-slate-200 rounded px-2 py-1 text-xs bg-white">
+                                  <option>A</option><option>B</option>
+                                </select>
+                              </td>
+                              <td className="px-4 py-3">
+                                <select value={det.status||"Contract"} onChange={e=>saveEmpDetail(emp.id,"status",e.target.value)}
+                                  className={`border rounded px-2 py-1 text-xs ${det.status==="Notice Period"?"bg-rose-50 border-rose-200 text-rose-700":det.status==="Probation"?"bg-amber-50 border-amber-200 text-amber-700":"bg-emerald-50 border-emerald-200 text-emerald-700"}`}>
+                                  <option>Contract</option><option>Probation</option><option>Notice Period</option>
+                                </select>
+                              </td>
+                              <td className="px-4 py-3">
+                                <input value={det.phone||""} onChange={e=>saveEmpDetail(emp.id,"phone",e.target.value)}
+                                  placeholder="03xx-xxxxxxx" className="border border-slate-200 rounded px-2 py-1 text-xs w-32"/>
+                              </td>
+                              <td className="px-4 py-3">
+                                <input value={det.emergencyContact||""} onChange={e=>saveEmpDetail(emp.id,"emergencyContact",e.target.value)}
+                                  placeholder="03xx-xxxxxxx" className="border border-slate-200 rounded px-2 py-1 text-xs w-32"/>
+                              </td>
+                              <td className="px-4 py-3">
+                                <input value={det.cnic||""} onChange={e=>saveEmpDetail(emp.id,"cnic",e.target.value)}
+                                  placeholder="xxxxx-xxxxxxx-x" className="border border-slate-200 rounded px-2 py-1 text-xs w-36"/>
+                              </td>
+                              <td className="px-4 py-3">
+                                <input value={det.address||""} onChange={e=>saveEmpDetail(emp.id,"address",e.target.value)}
+                                  placeholder="Address" className="border border-slate-200 rounded px-2 py-1 text-xs w-48"/>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 4 — GENERATE PAYROLL
+            ════════════════════════════════════════════════════════════ */}
+            {hrTab === "payroll" && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="font-medium text-lg">Payroll — September 2026 cycle</h2>
+                    <p className="text-sm text-slate-500">Review supervisor-submitted QA scores and attendance deductions, then generate payroll.</p>
+                  </div>
+                  <button onClick={() => setPayrollMsg("Payroll generated for September 2026.")} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg">Generate payroll</button>
+                </div>
+                {payrollMsg && <p className="text-sm text-teal-700 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 mb-4">{payrollMsg}</p>}
+
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Headcount</p><p className="text-xl font-semibold">{totals.headcount}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Total net payroll</p><p className="text-xl font-semibold">{money(totals.payroll)}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Incentives paid</p><p className="text-xl font-semibold text-teal-700">{money(totals.incentives)}</p></div>
+                  <div className="bg-white rounded-xl border border-slate-200 p-4"><p className="text-xs text-slate-500 mb-1">Deductions</p><p className="text-xl font-semibold text-rose-600">{money(totals.deductions)}</p></div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase"><tr><th className="text-left px-4 py-2">Employee</th><th className="text-center px-1 py-2">TT (s)</th><th className="text-center px-1 py-2">Qual %</th><th className="text-center px-2 py-2">Fine</th><th className="text-center px-2 py-2">Reward</th><th className="text-center px-2 py-2">Incentive</th><th className="text-center px-2 py-2">Deductions</th><th className="text-right px-4 py-2">Net pay</th></tr></thead>
+                    <tbody>
+                      {allPay.map((e) => (
+                        <tr key={e.id} className="border-t border-slate-100">
+                          <td className="px-4 py-2"><p className="font-medium">{e.name}</p><p className="text-xs text-slate-400">{e.role} · {e.id}</p></td>
+                          <td className="px-1 py-2 text-center">
+                            <input type="number" value={e.tt} onChange={(ev) => updateField(e.id, "tt", ev.target.value)}
+                              className="w-16 border border-slate-200 rounded px-1 py-1 text-center text-xs" />
+                          </td>
+                          <td className="px-1 py-2 text-center">
+                            <input type="number" value={e.quality} onChange={(ev) => updateField(e.id, "quality", ev.target.value)}
+                              className="w-14 border border-slate-200 rounded px-1 py-1 text-center text-xs" />
+                          </td>
+                          <td className="px-2 py-2 text-center">
+                            <input type="number" value={e.fine} onChange={(ev) => updateField(e.id, "fine", ev.target.value)}
+                              className="w-20 border border-rose-200 rounded px-1 py-1 text-center text-xs text-rose-600" />
+                          </td>
+                          <td className="px-2 py-2 text-center">
+                            <input type="number" value={e.specialReward} onChange={(ev) => updateField(e.id, "specialReward", ev.target.value)}
+                              className="w-20 border border-emerald-200 rounded px-1 py-1 text-center text-xs text-emerald-700" />
+                          </td>
+                          <td className="px-2 py-2 text-center text-teal-700">{money(e.incentive)}</td>
+                          <td className="px-2 py-2 text-center text-rose-600">{money(e.deductions)}</td>
+                          <td className="px-4 py-2 text-right font-semibold">{money(e.net)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-slate-400 mt-3">TT, Quality, Fine and Reward are editable here by HR and feed directly into Incentive, Deductions and Net pay. Loan, advance, tax, arrears and notice period are managed elsewhere.</p>
+              </div>
+            )}
+
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AizanERP />);
+</script>
+</body>
+</html>
